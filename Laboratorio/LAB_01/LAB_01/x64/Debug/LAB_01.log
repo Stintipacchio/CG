@@ -1,4 +1,3 @@
 ﻿  LAB_01.cpp
-  ShaderMaker.cpp
-  Generating Code...
-  LAB_01.vcxproj -> C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_01\x64\Debug\LAB_01.exe
+C:\Users\stint\Desktop\CG\Laboratorio\LAB_01\LAB_01\LAB_01.cpp(43,19): warning C4305: 'initializing': truncation from 'double' to 'float'
+  LAB_01.vcxproj -> C:\Users\stint\Desktop\CG\Laboratorio\LAB_01\x64\Debug\LAB_01.exe

@@ -39,6 +39,9 @@ float CurveArray[MaxNumPts][2];
 
 int NumPts = 0;
 
+bool dragging = false;
+float bound = 0.05;
+
 // Window size in pixels
 int		width = 500;
 int		height = 500;
@@ -89,13 +92,45 @@ void resizeWindow(int w, int h)
 void myMouseFunc(int button, int state, int x, int y) {
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 	{
-		// (x,y) viewport(0,width)x(0,height)   -->   (xPos,yPos) window(-1,1)x(-1,1)
 		float xPos = -1.0f + ((float)x) * 2 / ((float)(width));
 		float yPos = -1.0f + ((float)(height - y)) * 2 / ((float)(height));
 
-		addNewPoint(xPos, yPos);
+		bool moved = false;
+		for (int i = 0; i < NumPts; i++) {
+			if ((xPos - PointArray[i][0] < bound && xPos - PointArray[i][0] >  -bound) &&
+				(yPos - PointArray[i][1] < bound && yPos - PointArray[i][1] >  -bound))
+			{
+				moved = true;
+			}
+		}
+		if (moved == false)
+			addNewPoint(xPos, yPos);
 		glutPostRedisplay();
 
+	}
+}
+
+void myPassiveMotionFunc(int x, int y) {
+	if (glutGetModifiers() == GLUT_LEFT_BUTTON) dragging = true;
+	else dragging = false;
+}
+
+void myMotionFunc(int x, int y) {
+	if (dragging) {
+		float xPos = -1.0f + ((float)x) * 2 / ((float)(width));
+		float yPos = -1.0f + ((float)(height - y)) * 2 / ((float)(height));
+
+		for (int i = 0; i < NumPts; i++) {
+			if ((xPos - PointArray[i][0] < bound && xPos - PointArray[i][0] >  -bound) &&
+				(yPos - PointArray[i][1] < bound && yPos - PointArray[i][1] >  -bound))
+			{
+				//moves the point without creating a new one
+				PointArray[i][0] = xPos;
+				PointArray[i][1] = yPos;
+				glutPostRedisplay();
+				return;
+			}
+		}
 	}
 }
 
@@ -113,9 +148,9 @@ void addNewPoint(float x, float y) {
 	if (NumPts >= MaxNumPts) {
 		removeFirstPoint();
 	}
-		PointArray[NumPts][0] = x;
-		PointArray[NumPts][1] = y;
-		NumPts++;
+	PointArray[NumPts][0] = x;
+	PointArray[NumPts][1] = y;
+	NumPts++;
 }
 void initShader(void)
 {
@@ -148,6 +183,25 @@ void init(void)
 	glViewport(0, 0, 500, 500);
 }
 
+void de_Casteljau(float t, float* result) {
+
+	float CurveArray_bezier[MaxNumPts][MaxNumPts][2];
+	for (int y = 0; y < NumPts; y++) {
+		CurveArray_bezier[0][y][0] = PointArray[y][0];
+		CurveArray_bezier[0][y][1] = PointArray[y][1];
+	}
+
+	for (int i = 1; i < NumPts; i++) {
+		for (int j = 0; j < NumPts - i; j++) {
+			CurveArray_bezier[i][j][0] = ((1 - t) * CurveArray_bezier[i - 1][j][0]) + (t * CurveArray_bezier[i - 1][j + 1][0]);
+			CurveArray_bezier[i][j][1] = ((1 - t) * CurveArray_bezier[i - 1][j][1]) + (t * CurveArray_bezier[i - 1][j + 1][1]);
+		}
+
+	}
+	result[0] = CurveArray_bezier[NumPts - 1][0][0];
+	result[1] = CurveArray_bezier[NumPts - 1][0][1];
+}
+
 void drawScene(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -155,23 +209,22 @@ void drawScene(void)
 	if (NumPts > 1) {
 		// Draw curve
 		// TODO
-		float result[3];
+		float result[2];
 		for (int i = 0; i <= 100; i++) {
 			de_Casteljau((GLfloat)i / 100, result);
 			CurveArray[i][0] = result[0];
-			CurveArray[i][0] = result[1];
+			CurveArray[i][1] = result[1];
 		}
+
+
 		glBindVertexArray(VAO_2);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO_2);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(CurveArray), &CurveArray[0], GL_STATIC_DRAW);
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
+		glLineWidth(1.0);
+		glDrawArrays(GL_LINE_STRIP, 0, 100);
 
-		glPointSize(6.0);
-		glDrawArrays(GL_POINTS, 0, NumPts);
-
-		glLineWidth(0.5);
-		glDrawArrays(GL_LINE_STRIP, 0, 101);
 		glBindVertexArray(0);
 	}
 	// Draw control polygon
@@ -188,13 +241,6 @@ void drawScene(void)
 	glDrawArrays(GL_LINE_STRIP, 0, NumPts);
 	glBindVertexArray(0);
 	glutSwapBuffers();
-}
-
-void de_Casteljau(float pointarray[], float t) {
-	float tmp_array[] = pointarray[];
-	for (i = 0; i++; i = NumPts)
-
-
 }
 
 int main(int argc, char** argv)
@@ -214,6 +260,8 @@ int main(int argc, char** argv)
 	glutReshapeFunc(resizeWindow);
 	glutKeyboardFunc(myKeyboardFunc);
 	glutMouseFunc(myMouseFunc);
+	glutMotionFunc(myMotionFunc);
+	glutPassiveMotionFunc(myPassiveMotionFunc);
 
 	glewExperimental = GL_TRUE;
 	glewInit();
