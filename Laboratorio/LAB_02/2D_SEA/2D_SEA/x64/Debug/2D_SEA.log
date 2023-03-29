@@ -1,0 +1,26 @@
+﻿  2D_SEA.cpp
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_SEA\2D_SEA\2D_SEA.cpp(45,10): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_SEA\2D_SEA\2D_SEA.cpp(45,37): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_SEA\2D_SEA\2D_SEA.cpp(125,35): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_SEA\2D_SEA\2D_SEA.cpp(144,33): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_SEA\2D_SEA\2D_SEA.cpp(154,14): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_SEA\2D_SEA\2D_SEA.cpp(163,24): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_SEA\2D_SEA\2D_SEA.cpp(198,31): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_SEA\2D_SEA\2D_SEA.cpp(204,14): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_SEA\2D_SEA\2D_SEA.cpp(224,31): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_SEA\2D_SEA\2D_SEA.cpp(270,31): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_SEA\2D_SEA\2D_SEA.cpp(276,14): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_SEA\2D_SEA\2D_SEA.cpp(293,31): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_SEA\2D_SEA\2D_SEA.cpp(330,31): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_SEA\2D_SEA\2D_SEA.cpp(400,50): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_SEA\2D_SEA\2D_SEA.cpp(419,2): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_SEA\2D_SEA\2D_SEA.cpp(525,17): warning C4305: '+=': truncation from 'double' to 'float'
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_SEA\2D_SEA\2D_SEA.cpp(528,17): warning C4305: '-=': truncation from 'double' to 'float'
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_SEA\2D_SEA\2D_SEA.cpp(532,17): warning C4305: '+=': truncation from 'double' to 'float'
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_SEA\2D_SEA\2D_SEA.cpp(546,14): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_SEA\2D_SEA\2D_SEA.cpp(547,14): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_SEA\2D_SEA\2D_SEA.cpp(560,25): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_SEA\2D_SEA\2D_SEA.cpp(566,22): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+  ShaderMaker.cpp
+  Generating Code...
+  2D_SEA.vcxproj -> C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_SEA\x64\Debug\2D_SEA.exe

@@ -1,0 +1,20 @@
+﻿  2D_JUMP_BALL.cpp
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_JUMP_BALL\2D_JUMP_BALL\2D_JUMP_BALL.cpp(53,12): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_JUMP_BALL\2D_JUMP_BALL\2D_JUMP_BALL.cpp(128,10): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_JUMP_BALL\2D_JUMP_BALL\2D_JUMP_BALL.cpp(144,30): warning C4244: '+=': conversion from 'float' to 'int', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_JUMP_BALL\2D_JUMP_BALL\2D_JUMP_BALL.cpp(175,14): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_JUMP_BALL\2D_JUMP_BALL\2D_JUMP_BALL.cpp(181,24): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_JUMP_BALL\2D_JUMP_BALL\2D_JUMP_BALL.cpp(182,24): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_JUMP_BALL\2D_JUMP_BALL\2D_JUMP_BALL.cpp(185,28): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_JUMP_BALL\2D_JUMP_BALL\2D_JUMP_BALL.cpp(186,28): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_JUMP_BALL\2D_JUMP_BALL\2D_JUMP_BALL.cpp(208,68): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_JUMP_BALL\2D_JUMP_BALL\2D_JUMP_BALL.cpp(276,18): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_JUMP_BALL\2D_JUMP_BALL\2D_JUMP_BALL.cpp(315,46): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_JUMP_BALL\2D_JUMP_BALL\2D_JUMP_BALL.cpp(315,33): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_JUMP_BALL\2D_JUMP_BALL\2D_JUMP_BALL.cpp(315,27): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_JUMP_BALL\2D_JUMP_BALL\2D_JUMP_BALL.cpp(331,38): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_JUMP_BALL\2D_JUMP_BALL\2D_JUMP_BALL.cpp(331,24): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_JUMP_BALL\2D_JUMP_BALL\2D_JUMP_BALL.cpp(456,21): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+  ShaderMaker.cpp
+  Generating Code...
+  2D_JUMP_BALL.vcxproj -> C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_02\2D_JUMP_BALL\x64\Debug\2D_JUMP_BALL.exe
