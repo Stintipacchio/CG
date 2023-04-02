@@ -1,3 +1,9 @@
 ﻿  LAB_01.cpp
-C:\Users\stint\Desktop\CG\Laboratorio\LAB_01\LAB_01\LAB_01.cpp(43,19): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\stint\Desktop\CG\Laboratorio\LAB_01\LAB_01\LAB_01.cpp(54,19): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\stint\Desktop\CG\Laboratorio\LAB_01\LAB_01\LAB_01.cpp(246,11): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\stint\Desktop\CG\Laboratorio\LAB_01\LAB_01\LAB_01.cpp(247,11): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\stint\Desktop\CG\Laboratorio\LAB_01\LAB_01\LAB_01.cpp(248,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\stint\Desktop\CG\Laboratorio\LAB_01\LAB_01\LAB_01.cpp(249,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\stint\Desktop\CG\Laboratorio\LAB_01\LAB_01\LAB_01.cpp(250,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\stint\Desktop\CG\Laboratorio\LAB_01\LAB_01\LAB_01.cpp(251,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
   LAB_01.vcxproj -> C:\Users\stint\Desktop\CG\Laboratorio\LAB_01\x64\Debug\LAB_01.exe
