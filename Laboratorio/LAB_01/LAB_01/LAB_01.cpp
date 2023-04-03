@@ -242,7 +242,7 @@ void deCasteljau(float t, float* result, float Buffer_ArrayPoints[][2], int Buff
 }
 
 // dato un punto, il suo precedente e il suo successivo, questa funzione calcola il P- e il P+
-void calcolaPointPlusAndMinus(float pointPre[2], float point[2], float pointPost[2], float pointMinus[2], float pointPlus[2]) {
+void calcolaPointPlusAndMinus(float pointPre[2], float point[2], float pointPost[2], float pointMinus[2], float pointPlus[2], int i) {
 	float mX = (pointPost[0] - pointPre[0]) / 2.0;
 	float mY = (pointPost[1] - pointPre[1]) / 2.0;
 	float pointPlusX = point[0] + (mX / 3.0);
@@ -253,15 +253,18 @@ void calcolaPointPlusAndMinus(float pointPre[2], float point[2], float pointPost
 	pointMinus[1] = pointMinusY;
 	pointPlus[0] = pointPlusX;
 	pointPlus[1] = pointPlusY;
-	/*
+
+	std::cout << i << "^ vertice " << std::endl;
 	std::cout << "point x: " << point[0] << std::endl;
 	std::cout << "point y: " << point[1] << std::endl;
-	std::cout << "pointMin x: " << pointMinus[0] << std::endl;
-	std::cout << "pointMin y: " << pointMinus[1] << std::endl;
-	std::cout << "pointPlu x: " << pointPlus[0] << std::endl;
-	std::cout << "pointPlu y: " << pointPlus[1] << std::endl;
-	std::cout << "Calcolati i punti plus e minus!" << std::endl;
-	*/
+
+	std::cout << "PrevPoint x: " << pointMinus[0] << std::endl;
+	std::cout << "PrevPoint y: " << pointMinus[1] << std::endl;
+
+	std::cout << "NextPoint x: " << pointPlus[0] << std::endl;
+	std::cout << "NextPoint y: " << pointPlus[1] << std::endl;
+	std::cout << "\n" << std::endl;
+	
 }
 
 void costruzioneArrayCatmull() {
@@ -280,6 +283,7 @@ void costruzioneArrayCatmull() {
 		arrayPuntiUtenteEsteso[i + 1][1] = PointArray[i][1];
 	}
 	//-------------------------------------------------------------------------------------
+	int tmp_debug = 0;
 	int contatore = 0; //contatore che tiene traccia del PointArrayCatmull
 	// per ogni punto del arrayPuntiUtenteEsteso (a cui è stato aggiunto sia il punto iniziale che finale) viene calcolato il P- e il P+ come PointMinus e PointPlus, quindi vengono aggiunti PointMinus, Point e PointPlus al PointArrayCatmull. Nel caso del primo punto del arrayPuntiUtenteEsteso non viene aggiunto il PointMinus mentre nel caso dell'ultimo punto del arrayPuntiUtenteEsteso non viene aggiunto il PointPlus
 	for (int i = 1; i < numeroPuntiArrayEsteso - 1; i++) {
@@ -294,7 +298,7 @@ void costruzioneArrayCatmull() {
 		pointPost[1] = arrayPuntiUtenteEsteso[i + 1][1];
 		float pointMinus[2];
 		float pointPlus[2];
-		calcolaPointPlusAndMinus(pointPre, pointPoint, pointPost, pointMinus, pointPlus);
+		calcolaPointPlusAndMinus(pointPre, pointPoint, pointPost, pointMinus, pointPlus, i);
 		//aggiungo il minus
 		if (i - 1 > 0) { // se è il primo non aggiungo il plus
 			ArrayControlPointCatmull[contatore][0] = pointMinus[0];
@@ -313,6 +317,10 @@ void costruzioneArrayCatmull() {
 		}
 
 	}
+	for (int j = 0; j < 10; j++) {
+		std::cout << j + 1 << "^ punto x:" << ArrayControlPointCatmull[j][0] << " y:" << ArrayControlPointCatmull[j][1] << std::endl;
+	}
+	std::cout << "######################################" << std::endl;
 
 }
 
@@ -342,7 +350,7 @@ void drawScene(void)
 		glBindVertexArray(0);
 	}
 	if (NumPts > 1 && catmullPoint) {
-		std::cout << "Calcolo il pointArray per Catmull Rom" << std::endl;
+		//std::cout << "Calcolo il pointArray per Catmull Rom" << std::endl;
 		costruzioneArrayCatmull();
 		glBindVertexArray(VAO_2);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO_2);
@@ -353,7 +361,7 @@ void drawScene(void)
 		glDrawArrays(GL_POINTS, 0, NumPts * 3 - 2);
 	}
 	if (NumPts > 1 && catmullCurve) {
-		std::cout << "Calcolo la spline Catmull Rom" << std::endl;
+		//std::cout << "Calcolo la spline Catmull Rom" << std::endl;
 		costruzioneArrayCatmull();
 		int n_segmento = 0;
 		for (int j = 0; j < (NumPts * 3) - 2; j = j + 3) {
