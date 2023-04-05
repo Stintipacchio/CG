@@ -62,6 +62,7 @@ typedef enum {
 	EMERALD,
 	BRASS,
 	SLATE,
+	GOLD,
 	NO_MATERIAL
 } MaterialType;
 
@@ -119,6 +120,7 @@ glm::vec3 red_plastic_ambient = { 0.1, 0.0, 0.0 }, red_plastic_diffuse = { 0.6, 
 glm::vec3 brass_ambient = { 0.1, 0.06, 0.015 }, brass_diffuse = { 0.78, 0.57, 0.11 }, brass_specular = { 0.99, 0.91, 0.81 }; GLfloat brass_shininess = 27.8f;
 glm::vec3 emerald_ambient = { 0.0215, 0.04745, 0.0215 }, emerald_diffuse = { 0.07568, 0.61424, 0.07568 }, emerald_specular = { 0.633, 0.727811, 0.633 }; GLfloat emerald_shininess = 78.8f;
 glm::vec3 slate_ambient = { 0.02, 0.02, 0.02 }, slate_diffuse = { 0.1, 0.1, 0.1 }, slate_specular{ 0.4, 0.4, 0.4 }; GLfloat slate_shininess = 1.78125f;
+glm::vec3 gold_ambient = { 0.1, 0.06, 0.015 }, gold_diffuse = { 0.78, 0.57, 0.11 }, gold_specular = { 0.633, 0.727811, 0.633 }; GLfloat gold_shininess = 78.8f;
 
 typedef struct {
 	glm::vec3 position;
@@ -249,7 +251,7 @@ void init_waving_plane() {
 	objects.push_back(obj4);
 }
 
-void init_mesh() {
+void init_bunny() {
 	Mesh sphereS = {};
 	//	loadObjFile(MeshDir + "airplane.obj", &sphereS);
 	loadObjFile(MeshDir + "bunny.obj", &sphereS);
@@ -318,6 +320,21 @@ void init_grid() {
 	obj1.M = glm::mat4(1);
 	Grid = obj1;
 }
+
+void init_airplane() {
+	Mesh sphereS = {};
+	loadObjFile(MeshDir + "airplane.obj", &sphereS);
+	generate_and_load_buffers(true, &sphereS);
+	// Object Setup use the light shader and a material for color and light behavior
+	Object obj5 = {};
+	obj5.mesh = sphereS;
+	obj5.material = MaterialType::GOLD; // NO_MATERIAL;
+	obj5.shading = ShadingType::PHONG; // GOURAUD; // TOON;
+	obj5.name = "Airplane";
+	obj5.M = glm::scale(glm::translate(glm::mat4(1), glm::vec3(0., 0., -2.)), glm::vec3(2., 2., 2.));
+	objects.push_back(obj5);
+}
+
 
 
 void initShader()
@@ -422,7 +439,7 @@ void init() {
 	light.power = 1.f;
 
 	// Materials setup
-	materials.resize(5);
+	materials.resize(6);
 	materials[MaterialType::RED_PLASTIC].name = "Red Plastic";
 	materials[MaterialType::RED_PLASTIC].ambient = red_plastic_ambient;
 	materials[MaterialType::RED_PLASTIC].diffuse = red_plastic_diffuse;
@@ -446,6 +463,12 @@ void init() {
 	materials[MaterialType::SLATE].diffuse = slate_diffuse;
 	materials[MaterialType::SLATE].specular = slate_specular;
 	materials[MaterialType::SLATE].shininess = slate_shininess;
+	
+	materials[MaterialType::GOLD].name = "Gold";
+	materials[MaterialType::GOLD].ambient = gold_ambient;
+	materials[MaterialType::GOLD].diffuse = gold_diffuse;
+	materials[MaterialType::GOLD].specular = gold_specular;
+	materials[MaterialType::GOLD].shininess = gold_shininess;
 
 	materials[MaterialType::NO_MATERIAL].name = "NO_MATERIAL";
 	materials[MaterialType::NO_MATERIAL].ambient = glm::vec3(1, 1, 1);
@@ -486,7 +509,10 @@ void init() {
 	init_waving_plane();
 
 	//Airplane model with TOON SHADING
-	init_mesh();
+	init_airplane();
+
+	//Bunny
+	init_bunny();
 }
 
 void drawScene() {
@@ -793,6 +819,7 @@ void buildOpenGLMenu()
 	glutAddMenuEntry(materials[MaterialType::EMERALD].name.c_str(), MaterialType::EMERALD);
 	glutAddMenuEntry(materials[MaterialType::BRASS].name.c_str(), MaterialType::BRASS);
 	glutAddMenuEntry(materials[MaterialType::SLATE].name.c_str(), MaterialType::SLATE);
+	glutAddMenuEntry(materials[MaterialType::GOLD].name.c_str(), MaterialType::GOLD);
 
 	glutCreateMenu(main_menu_func); // richiama main_menu_func() alla selezione di una voce menu
 	glutAddMenuEntry("Opzioni", -1); //-1 significa che non si vuole gestire questa riga
