@@ -1,0 +1,37 @@
+﻿  HUD_Logger.cpp
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\HUD_Logger.cpp(16,19): warning C4244: 'argument': conversion from 'int' to 'GLfloat', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\HUD_Logger.cpp(16,16): warning C4244: 'argument': conversion from 'int' to 'GLfloat', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\HUD_Logger.cpp(36,37): warning C4244: 'initializing': conversion from 'GLfloat' to 'int', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\HUD_Logger.cpp(43,28): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\HUD_Logger.cpp(44,26): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\HUD_Logger.cpp(47,33): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\HUD_Logger.cpp(47,28): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\HUD_Logger.cpp(47,23): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\HUD_Logger.cpp(50,28): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\HUD_Logger.cpp(51,26): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\HUD_Logger.cpp(54,33): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\HUD_Logger.cpp(54,28): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\HUD_Logger.cpp(54,23): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+  LAB_03.cpp
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(494,31): warning C4305: 'argument': truncation from 'double' to 'GLclampf'
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(547,61): warning C4244: 'argument': conversion from 'clock_t' to 'GLfloat', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(547,35): warning C4244: 'argument': conversion from 'GLfloat' to 'GLint', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(556,64): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(574,12): warning C4244: 'initializing': conversion from 'GLfloat' to 'int', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(692,47): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(692,44): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(693,57): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(693,39): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(701,15): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(751,74): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(818,35): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(819,19): warning C4244: '=': conversion from 'double' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(1019,57): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(1028,57): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+  ShaderMaker.cpp
+  Generating Code...
+  LAB_03.vcxproj -> C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_03\x64\Debug\LAB_03.exe
