@@ -62,7 +62,7 @@ typedef enum {
 	EMERALD,
 	BRASS,
 	SLATE,
-	GOLD,
+	ZAPHIRE,
 	NO_MATERIAL
 } MaterialType;
 
@@ -120,7 +120,7 @@ glm::vec3 red_plastic_ambient = { 0.1, 0.0, 0.0 }, red_plastic_diffuse = { 0.6, 
 glm::vec3 brass_ambient = { 0.1, 0.06, 0.015 }, brass_diffuse = { 0.78, 0.57, 0.11 }, brass_specular = { 0.99, 0.91, 0.81 }; GLfloat brass_shininess = 27.8f;
 glm::vec3 emerald_ambient = { 0.0215, 0.04745, 0.0215 }, emerald_diffuse = { 0.07568, 0.61424, 0.07568 }, emerald_specular = { 0.633, 0.727811, 0.633 }; GLfloat emerald_shininess = 78.8f;
 glm::vec3 slate_ambient = { 0.02, 0.02, 0.02 }, slate_diffuse = { 0.1, 0.1, 0.1 }, slate_specular{ 0.4, 0.4, 0.4 }; GLfloat slate_shininess = 1.78125f;
-glm::vec3 gold_ambient = { 0.1, 0.06, 0.015 }, gold_diffuse = { 0.78, 0.57, 0.11 }, gold_specular = { 0.633, 0.727811, 0.633 }; GLfloat gold_shininess = 78.8f;
+glm::vec3 zaphire_ambient = { 0.0, 0.0, 0.1 }, zaphire_diffuse = { 0.0, 0.0, 0.8 }, zaphire_specular = { 1, 1, 1 }; GLfloat zaphire_shininess = 128;
 
 typedef struct {
 	glm::vec3 position;
@@ -132,7 +132,7 @@ static point_light light;
 
 /*camera structures*/
 constexpr float CAMERA_ZOOM_SPEED = 0.1f;
-constexpr float CAMERA_TRASLATION_SPEED = 0.01f;
+constexpr float CAMERA_TRASLATION_SPEED = 0.1f;
 
 struct {
 	glm::vec4 position;
@@ -260,7 +260,7 @@ void init_bunny() {
 	Object obj4 = {};
 	obj4.mesh = sphereS;
 	obj4.material = MaterialType::RED_PLASTIC; // NO_MATERIAL;
-	obj4.shading = ShadingType::PHONG; // GOURAUD; // TOON;
+	obj4.shading = ShadingType::TOON; // GOURAUD; // TOON;
 	obj4.name = "Bunny";
 	obj4.M = glm::scale(glm::translate(glm::mat4(1), glm::vec3(0., 0., -2.)), glm::vec3(2., 2., 2.));
 	objects.push_back(obj4);
@@ -289,7 +289,7 @@ void init_sphere_SMOOTH() {
 	Object obj4 = {};
 	obj4.mesh = sphereS;
 	obj4.material = MaterialType::EMERALD;
-	obj4.shading = ShadingType::BLINN;
+	obj4.shading = ShadingType::TOON;
 	obj4.name = "Sphere SMOOTH";
 	obj4.M = glm::translate(glm::mat4(1), glm::vec3(6., 0., -3.));
 	objects.push_back(obj4);
@@ -328,7 +328,7 @@ void init_airplane() {
 	// Object Setup use the light shader and a material for color and light behavior
 	Object obj5 = {};
 	obj5.mesh = sphereS;
-	obj5.material = MaterialType::GOLD; // NO_MATERIAL;
+	obj5.material = MaterialType::ZAPHIRE; // NO_MATERIAL;
 	obj5.shading = ShadingType::PHONG; // GOURAUD; // TOON;
 	obj5.name = "Airplane";
 	obj5.M = glm::scale(glm::translate(glm::mat4(1), glm::vec3(0., 0., -2.)), glm::vec3(2., 2., 2.));
@@ -413,8 +413,46 @@ void initShader()
 
 	//Wave Shader Loading
 	//TODO
-	//TOON Shader Loading
-	//TODO
+
+	// TOON Shader loading
+	shaders_IDs[TOON] = createProgram(ShaderDir + "v_toon.glsl", ShaderDir + "f_toon.glsl");
+
+	// Otteniamo i puntatori alle variabili uniform per poterle utilizzare in seguito
+	base_unif.P_Matrix_pointer = glGetUniformLocation(shaders_IDs[TOON], "P");
+	base_unif.V_Matrix_pointer = glGetUniformLocation(shaders_IDs[TOON], "V");
+	base_unif.M_Matrix_pointer = glGetUniformLocation(shaders_IDs[TOON], "M");
+	base_uniforms[ShadingType::TOON] = base_unif;
+
+	// Uniforms per la luce e i materiali
+	light_unif.material_ambient = glGetUniformLocation(shaders_IDs[TOON], "material.ambient");
+	light_unif.material_diffuse = glGetUniformLocation(shaders_IDs[TOON], "material.diffuse");
+	light_unif.material_specular = glGetUniformLocation(shaders_IDs[TOON], "material.specular");
+	light_unif.material_shininess = glGetUniformLocation(shaders_IDs[TOON], "material.shininess");
+	light_unif.light_position_pointer = glGetUniformLocation(shaders_IDs[TOON], "light.position");
+	light_unif.light_color_pointer = glGetUniformLocation(shaders_IDs[TOON], "light.color");
+	light_unif.light_power_pointer = glGetUniformLocation(shaders_IDs[TOON], "light.power");
+	light_uniforms[ShadingType::TOON] = light_unif;
+
+	// Rendiamo attivo lo shader
+	glUseProgram(shaders_IDs[TOON]);
+
+	// Shader uniforms initialization
+	glUniform3f(light_uniforms[TOON].light_position_pointer, light.position.x, light.position.y, light.position.z);
+	glUniform3f(light_uniforms[TOON].light_color_pointer, light.color.r, light.color.g, light.color.b);
+	glUniform1f(light_uniforms[TOON].light_power_pointer, light.power);
+
+	// Uniform per il bordo
+	int border_uniform_pointer = glGetUniformLocation(shaders_IDs[TOON], "border");
+	float border_value = 0.05f; // Regola questo valore in base alla dimensione del tuo oggetto
+	glUniform1f(border_uniform_pointer, border_value);
+
+	// Uniform per la scala dei toni
+	int tone_scale_uniform_pointer = glGetUniformLocation(shaders_IDs[TOON], "tone_scale");
+	float tone_scale_value = 5.0f; // Regola questo valore in base alla luminosità della scena
+	glUniform1f(tone_scale_uniform_pointer, tone_scale_value);
+	
+
+
 	//Pass-Through Shader loading
 	shaders_IDs[PASS_THROUGH] = createProgram(ShaderDir + "v_passthrough.glsl", ShaderDir + "f_passthrough.glsl");
 	//Otteniamo i puntatori alle variabili uniform per poterle utilizzare in seguito
@@ -464,11 +502,11 @@ void init() {
 	materials[MaterialType::SLATE].specular = slate_specular;
 	materials[MaterialType::SLATE].shininess = slate_shininess;
 	
-	materials[MaterialType::GOLD].name = "Gold";
-	materials[MaterialType::GOLD].ambient = gold_ambient;
-	materials[MaterialType::GOLD].diffuse = gold_diffuse;
-	materials[MaterialType::GOLD].specular = gold_specular;
-	materials[MaterialType::GOLD].shininess = gold_shininess;
+	materials[MaterialType::ZAPHIRE].name = "Zaphire";
+	materials[MaterialType::ZAPHIRE].ambient = zaphire_ambient;
+	materials[MaterialType::ZAPHIRE].diffuse = zaphire_diffuse;
+	materials[MaterialType::ZAPHIRE].specular = zaphire_specular;
+	materials[MaterialType::ZAPHIRE].shininess = zaphire_shininess;
 
 	materials[MaterialType::NO_MATERIAL].name = "NO_MATERIAL";
 	materials[MaterialType::NO_MATERIAL].ambient = glm::vec3(1, 1, 1);
@@ -559,6 +597,11 @@ void drawScene() {
 			glUseProgram(shaders_IDs[TOON]);
 			// Caricamento matrice trasformazione del modello
 			glUniformMatrix4fv(base_uniforms[TOON].M_Matrix_pointer, 1, GL_FALSE, value_ptr(objects[i].M));
+			//Material loading
+			glUniform3fv(light_uniforms[TOON].material_ambient, 1, glm::value_ptr(materials[objects[i].material].ambient));
+			glUniform3fv(light_uniforms[TOON].material_diffuse, 1, glm::value_ptr(materials[objects[i].material].diffuse));
+			glUniform3fv(light_uniforms[TOON].material_specular, 1, glm::value_ptr(materials[objects[i].material].specular));
+			glUniform1f(light_uniforms[TOON].material_shininess, materials[objects[i].material].shininess);
 			break;
 		case ShadingType::PASS_THROUGH:
 			glUseProgram(shaders_IDs[PASS_THROUGH]);
@@ -819,7 +862,7 @@ void buildOpenGLMenu()
 	glutAddMenuEntry(materials[MaterialType::EMERALD].name.c_str(), MaterialType::EMERALD);
 	glutAddMenuEntry(materials[MaterialType::BRASS].name.c_str(), MaterialType::BRASS);
 	glutAddMenuEntry(materials[MaterialType::SLATE].name.c_str(), MaterialType::SLATE);
-	glutAddMenuEntry(materials[MaterialType::GOLD].name.c_str(), MaterialType::GOLD);
+	glutAddMenuEntry(materials[MaterialType::ZAPHIRE].name.c_str(), MaterialType::ZAPHIRE);
 
 	glutCreateMenu(main_menu_func); // richiama main_menu_func() alla selezione di una voce menu
 	glutAddMenuEntry("Opzioni", -1); //-1 significa che non si vuole gestire questa riga
@@ -861,12 +904,22 @@ void moveCameraBack()
 
 void moveCameraLeft()
 {
-	//TODO
+	glm::vec4 direction = ViewSetup.target - ViewSetup.position;
+	glm::vec4 right = glm::vec4(glm::cross(glm::vec3(direction), glm::vec3(0.0f, 1.0f, 0.0f)), 0.0f);
+	right = glm::normalize(right);
+	glm::vec4 leftTranslation = -right * CAMERA_TRASLATION_SPEED;
+	ViewSetup.position += leftTranslation;
+	ViewSetup.target += leftTranslation;
 }
 
 void moveCameraRight()
 {
-	//TODO
+	glm::vec4 direction = ViewSetup.target - ViewSetup.position;
+	glm::vec4 right = glm::vec4(glm::cross(glm::vec3(direction), glm::vec3(0.0f, 1.0f, 0.0f)), 0.0f);
+	right = glm::normalize(right);
+	glm::vec4 rightTranslation = right * CAMERA_TRASLATION_SPEED;
+	ViewSetup.position += rightTranslation;
+	ViewSetup.target += rightTranslation;
 }
 
 void moveCameraUp()
@@ -998,6 +1051,7 @@ void loadObjFile(string file_path, Mesh* mesh)
 	if (tmp_normals.size() == 0) {
 		tmp_normals.resize(vertexIndices.size() / 3, glm::vec3(0.0, 0.0, 0.0));
 		// normal of each face saved 1 time PER FACE!
+		
 		for (int i = 0; i < vertexIndices.size(); i += 3)
 		{
 			GLushort ia = vertexIndices[i];
@@ -1006,22 +1060,25 @@ void loadObjFile(string file_path, Mesh* mesh)
 			glm::vec3 normal = glm::normalize(glm::cross(
 				glm::vec3(tmp_vertices[ib]) - glm::vec3(tmp_vertices[ia]),
 				glm::vec3(tmp_vertices[ic]) - glm::vec3(tmp_vertices[ia])));
+		
 			
 			//Normali ai vertici
-			//tmp_normals[ia] += normal;
-			//tmp_normals[ib] += normal;
-			//tmp_normals[ic] += normal;
+			tmp_normals[ia] += normal;
+			tmp_normals[ib] += normal;
+			tmp_normals[ic] += normal;
 			//Put an index to the normal for all 3 vertex of the face
-			//normalIndices.push_back(ia);
-			//normalIndices.push_back(ib);
-			//normalIndices.push_back(ic);
+			normalIndices.push_back(ia);
+			normalIndices.push_back(ib);
+			normalIndices.push_back(ic);
 
 			// Normali alle facce
+			/*
 			tmp_normals[i / 3] = normal;
 			//Put an index to the normal for all 3 vertex of the face
 			normalIndices.push_back(i / 3);
 			normalIndices.push_back(i / 3);
 			normalIndices.push_back(i / 3);
+			*/
 		}
 	}
 
