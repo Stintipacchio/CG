@@ -41,17 +41,25 @@ void main() {
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     vec3 specular =  light.power * light.color * spec * material.specular;
 
-	vec4 result;	
+		
 	float intensity = dot(normalize(L), N);
-
-	if (intensity > 0.95)
-		result = vec4(1.0,0.5,0.5,1.0);
-	else if (intensity > 0.5)
-		result = vec4(0.6,0.3,0.3,1.0);
-	else if (intensity > 0.25)
-		result = vec4(0.4,0.2,0.2,1.0);
-	else
-		result = vec4(0.2,0.1,0.1,1.0);
-    
-    FragColor = result;
+	
+	vec3 shade_buffer = ambient + diffuse;
+	vec3 result_buffer;
+	
+	if (intensity > 0.95){
+		result_buffer = vec3(shade_buffer[0],shade_buffer[1],shade_buffer[2]);
+	}
+	else if (intensity > 0.6){
+		result_buffer = vec3(shade_buffer[0] - 0.2, shade_buffer[1] - 0.2, shade_buffer[2] - 0.2);
+	}
+	else if (intensity > 0.35){
+		result_buffer = vec3(shade_buffer[0] - 0.4, shade_buffer[1] - 0.4, shade_buffer[2] - 0.4);
+	}
+	else{
+		result_buffer = vec3(shade_buffer[0] - 0.6, shade_buffer[1] - 0.6, shade_buffer[2] - 0.6);
+	}
+	
+    vec3 result = result_buffer;
+    FragColor = vec4(result, 1.0);
 }
