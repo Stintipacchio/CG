@@ -259,7 +259,7 @@ void init_bunny() {
 	// Object Setup use the light shader and a material for color and light behavior
 	Object obj4 = {};
 	obj4.mesh = sphereS;
-	obj4.material = MaterialType::RED_PLASTIC; // NO_MATERIAL;
+	obj4.material = MaterialType::ZAPHIRE; // NO_MATERIAL;
 	obj4.shading = ShadingType::TOON; // GOURAUD; // TOON;
 	obj4.name = "Bunny";
 	obj4.M = glm::scale(glm::translate(glm::mat4(1), glm::vec3(0., 0., -2.)), glm::vec3(2., 2., 2.));
@@ -328,7 +328,7 @@ void init_airplane() {
 	// Object Setup use the light shader and a material for color and light behavior
 	Object obj5 = {};
 	obj5.mesh = sphereS;
-	obj5.material = MaterialType::ZAPHIRE; // NO_MATERIAL;
+	obj5.material = MaterialType::RED_PLASTIC; // NO_MATERIAL;
 	obj5.shading = ShadingType::PHONG; // GOURAUD; // TOON;
 	obj5.name = "Airplane";
 	obj5.M = glm::scale(glm::translate(glm::mat4(1), glm::vec3(0., 0., -2.)), glm::vec3(2., 2., 2.));
