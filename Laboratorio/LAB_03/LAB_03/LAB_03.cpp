@@ -37,6 +37,8 @@ based on the OpenGL Shading Language (GLSL) specifications.
 #define SHIFT_WHEEL_DOWN 12
 #define CTRL_WHEEL_UP 19
 #define CTRL_WHEEL_DOWN 20
+#define LEFT_KEY 77
+#define RIGHT_KEY 75
 
 #define NUM_SHADERS 9
 
@@ -237,35 +239,31 @@ void init_light_object() {
 	objects.push_back(obj);
 }
 
-void init_waving_plane() {
-	Mesh sphereS = {};
-	loadObjFile(MeshDir + "GridPlane.obj", &sphereS);
-	generate_and_load_buffers(true, &sphereS);
-	// Object Setup use the light shader and a material for color and light behavior
-	Object obj4 = {};
-	obj4.mesh = sphereS;
-	obj4.material = MaterialType::ZAPHIRE;
-	obj4.shading = ShadingType::WAVE;// WAVE;
-	obj4.name = "Waves";
-	obj4.M = glm::scale(glm::translate(glm::mat4(1), glm::vec3(0., -2., 0.)), glm::vec3(8., 8., 8.));
-	objects.push_back(obj4);
+void init_axis() {
+	Mesh _grid = {};
+	loadObjFile(MeshDir + "axis.obj", &_grid);
+	generate_and_load_buffers(true, &_grid);
+	Object obj1 = {};
+	obj1.mesh = _grid;
+	obj1.material = MaterialType::NO_MATERIAL;
+	obj1.shading = ShadingType::BLINN;
+	obj1.name = "axis_";
+	obj1.M = glm::scale(glm::mat4(1), glm::vec3(2.f, 2.f, 2.f));
+	Axis = obj1;
 }
 
-void init_bunny() {
-	Mesh sphereS = {};
-	//	loadObjFile(MeshDir + "airplane.obj", &sphereS);
-	loadObjFile(MeshDir + "bunny.obj", &sphereS);
-	generate_and_load_buffers(true, &sphereS);
-	// Object Setup use the light shader and a material for color and light behavior
-	Object obj4 = {};
-	obj4.mesh = sphereS;
-	obj4.material = MaterialType::ZAPHIRE; // NO_MATERIAL;
-	obj4.shading = ShadingType::TOON; // GOURAUD; // TOON;
-	obj4.name = "Bunny";
-	obj4.M = glm::scale(glm::translate(glm::mat4(1), glm::vec3(0., 0., -2.)), glm::vec3(2., 2., 2.));
-	objects.push_back(obj4);
+void init_grid() {
+	Mesh _grid = {};
+	loadObjFile(MeshDir + "reference_grid.obj", &_grid);
+	generate_and_load_buffers(true, &_grid);
+	Object obj2 = {};
+	obj2.mesh = _grid;
+	obj2.material = MaterialType::NO_MATERIAL;
+	obj2.shading = ShadingType::PASS_THROUGH;
+	obj2.name = "grid_";
+	obj2.M = glm::mat4(1);
+	Grid = obj2;
 }
-
 
 void init_sphere_FLAT() {
 	Mesh sphereF = {};
@@ -295,30 +293,18 @@ void init_sphere_SMOOTH() {
 	objects.push_back(obj4);
 }
 
-void init_axis() {
-	Mesh _grid = {};
-	loadObjFile(MeshDir + "axis.obj", &_grid);
-	generate_and_load_buffers(true, &_grid);
-	Object obj1 = {};
-	obj1.mesh = _grid;
-	obj1.material = MaterialType::NO_MATERIAL;
-	obj1.shading = ShadingType::BLINN;
-	obj1.name = "axis_";
-	obj1.M = glm::scale(glm::mat4(1), glm::vec3(2.f, 2.f, 2.f));
-	Axis = obj1;
-}
-
-void init_grid() {
-	Mesh _grid = {};
-	loadObjFile(MeshDir + "reference_grid.obj", &_grid);
-	generate_and_load_buffers(true, &_grid);
-	Object obj1 = {};
-	obj1.mesh = _grid;
-	obj1.material = MaterialType::NO_MATERIAL;
-	obj1.shading = ShadingType::PASS_THROUGH;
-	obj1.name = "grid_";
-	obj1.M = glm::mat4(1);
-	Grid = obj1;
+void init_waving_plane() {
+	Mesh sphereS = {};
+	loadObjFile(MeshDir + "GridPlane.obj", &sphereS);
+	generate_and_load_buffers(true, &sphereS);
+	// Object Setup use the light shader and a material for color and light behavior
+	Object obj5 = {};
+	obj5.mesh = sphereS;
+	obj5.material = MaterialType::ZAPHIRE;
+	obj5.shading = ShadingType::WAVE;// WAVE;
+	obj5.name = "Waves";
+	obj5.M = glm::scale(glm::translate(glm::mat4(1), glm::vec3(0., -2., 0.)), glm::vec3(8., 8., 8.));
+	objects.push_back(obj5);
 }
 
 void init_airplane() {
@@ -326,13 +312,28 @@ void init_airplane() {
 	loadObjFile(MeshDir + "airplane.obj", &sphereS);
 	generate_and_load_buffers(true, &sphereS);
 	// Object Setup use the light shader and a material for color and light behavior
-	Object obj5 = {};
-	obj5.mesh = sphereS;
-	obj5.material = MaterialType::RED_PLASTIC; // NO_MATERIAL;
-	obj5.shading = ShadingType::PHONG; // GOURAUD; // TOON;
-	obj5.name = "Airplane";
-	obj5.M = glm::scale(glm::translate(glm::mat4(1), glm::vec3(0., 0., -2.)), glm::vec3(2., 2., 2.));
-	objects.push_back(obj5);
+	Object obj6 = {};
+	obj6.mesh = sphereS;
+	obj6.material = MaterialType::RED_PLASTIC; // NO_MATERIAL;
+	obj6.shading = ShadingType::PHONG; // GOURAUD; // TOON;
+	obj6.name = "Airplane";
+	obj6.M = glm::scale(glm::translate(glm::mat4(1), glm::vec3(0., 0., -2.)), glm::vec3(2., 2., 2.));
+	objects.push_back(obj6);
+}
+
+void init_bunny() {
+	Mesh sphereS = {};
+	//	loadObjFile(MeshDir + "airplane.obj", &sphereS);
+	loadObjFile(MeshDir + "bunny.obj", &sphereS);
+	generate_and_load_buffers(true, &sphereS);
+	// Object Setup use the light shader and a material for color and light behavior
+	Object obj7 = {};
+	obj7.mesh = sphereS;
+	obj7.material = MaterialType::ZAPHIRE; // NO_MATERIAL;
+	obj7.shading = ShadingType::TOON; // GOURAUD; // TOON;
+	obj7.name = "Bunny";
+	obj7.M = glm::scale(glm::translate(glm::mat4(1), glm::vec3(0., 0., -2.)), glm::vec3(2., 2., 2.));
+	objects.push_back(obj7);
 }
 
 
@@ -818,6 +819,8 @@ void keyboardDown(unsigned char key, int x, int y)
 	case 's':
 		OperationMode = SCALING;
 		break;
+	case 'n':
+		OperationMode = NAVIGATION;
 	case 27:
 		glutLeaveMainLoop();
 		break;
@@ -831,6 +834,10 @@ void keyboardDown(unsigned char key, int x, int y)
 	case 'z':
 		WorkingAxis = Z;
 		break;
+	case LEFT_KEY:
+		selected_obj = selected_obj - 1;
+	case RIGHT_KEY:
+		selected_obj = selected_obj + 1;
 	default:
 		break;
 	}
@@ -879,6 +886,11 @@ void material_menu_function(int option)
 	objects[selected_obj].material = (MaterialType)option;
 }
 
+void shading_menu_function(int option)
+{
+	objects[selected_obj].shading = (ShadingType)option;
+}
+
 void buildOpenGLMenu()
 {
 	int materialSubMenu = glutCreateMenu(material_menu_function);
@@ -889,6 +901,14 @@ void buildOpenGLMenu()
 	glutAddMenuEntry(materials[MaterialType::SLATE].name.c_str(), MaterialType::SLATE);
 	glutAddMenuEntry(materials[MaterialType::ZAPHIRE].name.c_str(), MaterialType::ZAPHIRE);
 
+	int shaderSubMenu = glutCreateMenu(shading_menu_function);
+
+	glutAddMenuEntry("GOURAUD", ShadingType::GOURAUD);
+	glutAddMenuEntry("PHONG", ShadingType::PHONG);
+	glutAddMenuEntry("TOON", ShadingType::TOON);
+	glutAddMenuEntry("PASS_THROUGH", ShadingType::PASS_THROUGH);
+	glutAddMenuEntry("WAVE", ShadingType::WAVE);
+
 	glutCreateMenu(main_menu_func); // richiama main_menu_func() alla selezione di una voce menu
 	glutAddMenuEntry("Opzioni", -1); //-1 significa che non si vuole gestire questa riga
 	glutAddMenuEntry("", -1);
@@ -897,6 +917,7 @@ void buildOpenGLMenu()
 	glutAddMenuEntry("Culling: ON", MenuOption::CULLING_ON);
 	glutAddMenuEntry("Culling: OFF", MenuOption::CULLING_OFF);
 	glutAddSubMenu("Material", materialSubMenu);
+	glutAddSubMenu("Shader", shaderSubMenu);
 	glutAddMenuEntry("World coordinate system", MenuOption::CHANGE_TO_WCS);
 	glutAddMenuEntry("Object coordinate system", MenuOption::CHANGE_TO_OCS);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
@@ -930,7 +951,7 @@ void moveCameraBack()
 void moveCameraLeft()
 {
 	glm::vec4 direction = ViewSetup.target - ViewSetup.position;
-	glm::vec4 right = glm::vec4(glm::cross(glm::vec3(direction), glm::vec3(0.0f, 1.0f, 0.0f)), 0.0f);
+	glm::vec4 right = glm::vec4(glm::cross(glm::vec3(direction), glm::vec3(ViewSetup.upVector)), 0.0f);
 	right = glm::normalize(right);
 	glm::vec4 leftTranslation = -right * CAMERA_TRASLATION_SPEED;
 	ViewSetup.position += leftTranslation;
@@ -940,7 +961,7 @@ void moveCameraLeft()
 void moveCameraRight()
 {
 	glm::vec4 direction = ViewSetup.target - ViewSetup.position;
-	glm::vec4 right = glm::vec4(glm::cross(glm::vec3(direction), glm::vec3(0.0f, 1.0f, 0.0f)), 0.0f);
+	glm::vec4 right = glm::vec4(glm::cross(glm::vec3(direction), glm::vec3(ViewSetup.upVector)), 0.0f);
 	right = glm::normalize(right);
 	glm::vec4 rightTranslation = right * CAMERA_TRASLATION_SPEED;
 	ViewSetup.position += rightTranslation;
@@ -967,7 +988,17 @@ void moveCameraDown()
 
 void modifyModelMatrix(glm::vec3 translation_vector, glm::vec3 rotation_vector, GLfloat angle, GLfloat scale_factor)
 {
-	//TODO 
+	// Costruisco le matrici di traslazione, rotazione e scalamento
+	glm::mat4 translation_matrix = glm::translate(glm::mat4(1.0f), translation_vector);
+	glm::mat4 rotation_matrix = glm::rotate(glm::mat4(1.0f), angle, rotation_vector);
+	glm::mat4 scale_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale_factor));
+
+	// Calcolo la matrice di trasformazione del modello come prodotto delle matrici
+	glm::mat4 model_matrix = translation_matrix * rotation_matrix * scale_matrix;
+
+	// Applico la matrice di trasformazione al modello corrente
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf(glm::value_ptr(model_matrix));
 }
 
 void generate_and_load_buffers(bool generate, Mesh* mesh)
