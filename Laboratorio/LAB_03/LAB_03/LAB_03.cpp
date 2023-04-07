@@ -33,6 +33,8 @@ based on the OpenGL Shading Language (GLSL) specifications.
 #include "HUD_Logger.h"
 #include "ShaderMaker.h"
 
+#define WHEEL_UP 3
+#define WHEEL_DOWN 4
 #define SHIFT_WHEEL_UP 11
 #define SHIFT_WHEEL_DOWN 12
 #define CTRL_WHEEL_UP 19
@@ -756,20 +758,46 @@ void mouseClick(int button, int state, int x, int y)
 
 	switch (OperationMode) {
 	case TRASLATING:
+		switch (button)
+		{
+		case WHEEL_UP:
+			std::cout << " SOPRA " << std::endl;
+			break;
+		case WHEEL_DOWN:
+			std::cout << " SOTTO " << std::endl;
+			break;
+		}
 		modifyModelMatrix(axis * amount, axis, 0.0f, 1.0f);
 		break;
 	case ROTATING:
+		switch (button)
+		{
+		case WHEEL_UP:
+			std::cout << " SOPRA " << std::endl;
+			break;
+		case WHEEL_DOWN:
+			std::cout << " SOTTO " << std::endl;
+			break;
+		}
 		modifyModelMatrix(glm::vec3(0), axis, amount * 20.0f, 1.0f);
 		break;
 	case SCALING:
+		switch (button)
+		{
+		case WHEEL_UP:
+			std::cout << " SOPRA " << std::endl;
+			break;
+		case WHEEL_DOWN:
+			std::cout << " SOTTO " << std::endl;
+			break;
+		}
 		modifyModelMatrix(glm::vec3(0), axis, 0.0f, 1.0f + amount);
 		break;
 	case NAVIGATION:
-		// Wheel reports as button 3(scroll up) and button 4(scroll down)
-		if (button == 3) {
+		if (button == WHEEL_DOWN) {
 			moveCameraBack();
 		}
-		else if (button == 4) {
+		else if (button == WHEEL_UP) {
 			moveCameraForeward();
 		}
 		break;
@@ -988,6 +1016,41 @@ void moveCameraDown()
 
 void modifyModelMatrix(glm::vec3 translation_vector, glm::vec3 rotation_vector, GLfloat angle, GLfloat scale_factor)
 {
+	/*
+	if (OperationMode == TRASLATING) {
+		switch (button)
+		{
+		case SHIFT_WHEEL_UP:
+			std::cout << " SOPRA " << std::endl;
+			break;
+		case SHIFT_WHEEL_DOWN:
+			std::cout << " SOTTO " << std::endl;
+			break;
+		}
+	}
+	else if (OperationMode == ROTATING) {
+		switch (button)
+		{
+		case SHIFT_WHEEL_UP:
+			std::cout << " SOPRA " << std::endl;
+			break;
+		case SHIFT_WHEEL_DOWN:
+			std::cout << " SOTTO " << std::endl;
+			break;
+		}
+	}
+	else if (OperationMode == SCALING){
+		switch (button)
+		{
+		case SHIFT_WHEEL_UP:
+			std::cout << " SOPRA " << std::endl;
+			break;
+		case SHIFT_WHEEL_DOWN:
+			std::cout << " SOTTO " << std::endl;
+			break;
+		}
+	}
+	
 	// Costruisco le matrici di traslazione, rotazione e scalamento
 	glm::mat4 translation_matrix = glm::translate(glm::mat4(1.0f), translation_vector);
 	glm::mat4 rotation_matrix = glm::rotate(glm::mat4(1.0f), angle, rotation_vector);
@@ -999,6 +1062,7 @@ void modifyModelMatrix(glm::vec3 translation_vector, glm::vec3 rotation_vector, 
 	// Applico la matrice di trasformazione al modello corrente
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(glm::value_ptr(model_matrix));
+	*/
 }
 
 void generate_and_load_buffers(bool generate, Mesh* mesh)
