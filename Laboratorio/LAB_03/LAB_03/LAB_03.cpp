@@ -758,39 +758,12 @@ void mouseClick(int button, int state, int x, int y)
 
 	switch (OperationMode) {
 	case TRASLATING:
-		switch (button)
-		{
-		case WHEEL_UP:
-			std::cout << " SOPRA " << std::endl;
-			break;
-		case WHEEL_DOWN:
-			std::cout << " SOTTO " << std::endl;
-			break;
-		}
 		modifyModelMatrix(axis * amount, axis, 0.0f, 1.0f);
 		break;
 	case ROTATING:
-		switch (button)
-		{
-		case WHEEL_UP:
-			std::cout << " SOPRA " << std::endl;
-			break;
-		case WHEEL_DOWN:
-			std::cout << " SOTTO " << std::endl;
-			break;
-		}
 		modifyModelMatrix(glm::vec3(0), axis, amount * 20.0f, 1.0f);
 		break;
 	case SCALING:
-		switch (button)
-		{
-		case WHEEL_UP:
-			std::cout << " SOPRA " << std::endl;
-			break;
-		case WHEEL_DOWN:
-			std::cout << " SOTTO " << std::endl;
-			break;
-		}
 		modifyModelMatrix(glm::vec3(0), axis, 0.0f, 1.0f + amount);
 		break;
 	case NAVIGATION:
@@ -1016,53 +989,36 @@ void moveCameraDown()
 
 void modifyModelMatrix(glm::vec3 translation_vector, glm::vec3 rotation_vector, GLfloat angle, GLfloat scale_factor)
 {
-	/*
-	if (OperationMode == TRASLATING) {
-		switch (button)
-		{
-		case SHIFT_WHEEL_UP:
-			std::cout << " SOPRA " << std::endl;
-			break;
-		case SHIFT_WHEEL_DOWN:
-			std::cout << " SOTTO " << std::endl;
-			break;
-		}
+	glm::mat4 translation_matrix;
+	glm::mat4 rotation_matrix;
+	glm::mat4 scale_matrix;
+	switch (TransformMode) {
+	case WCS:
+		// Costruisco le matrici di traslazione, rotazione e scalamento
+		glm::vec3 WCS_COORDINATES = -objects[selected_obj].M[1];
+		translation_matrix = glm::translate(objects[selected_obj].M, WCS_COORDINATES);
+		translation_matrix = glm::translate(objects[selected_obj].M, translation_vector);
+		break;
+	case OCS:
+		// Costruisco le matrici di traslazione, rotazione e scalamento
+		translation_matrix = glm::translate(objects[selected_obj].M, translation_vector);
+		break;
 	}
-	else if (OperationMode == ROTATING) {
-		switch (button)
-		{
-		case SHIFT_WHEEL_UP:
-			std::cout << " SOPRA " << std::endl;
-			break;
-		case SHIFT_WHEEL_DOWN:
-			std::cout << " SOTTO " << std::endl;
-			break;
-		}
-	}
-	else if (OperationMode == SCALING){
-		switch (button)
-		{
-		case SHIFT_WHEEL_UP:
-			std::cout << " SOPRA " << std::endl;
-			break;
-		case SHIFT_WHEEL_DOWN:
-			std::cout << " SOTTO " << std::endl;
-			break;
-		}
-	}
-	
-	// Costruisco le matrici di traslazione, rotazione e scalamento
-	glm::mat4 translation_matrix = glm::translate(glm::mat4(1.0f), translation_vector);
-	glm::mat4 rotation_matrix = glm::rotate(glm::mat4(1.0f), angle, rotation_vector);
-	glm::mat4 scale_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale_factor));
-
-	// Calcolo la matrice di trasformazione del modello come prodotto delle matrici
-	glm::mat4 model_matrix = translation_matrix * rotation_matrix * scale_matrix;
+	rotation_matrix = glm::rotate(objects[selected_obj].M, angle, rotation_vector);
+	scale_matrix = glm::scale(objects[selected_obj].M, glm::vec3(scale_factor));
 
 	// Applico la matrice di trasformazione al modello corrente
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(glm::value_ptr(model_matrix));
-	*/
+	switch (OperationMode) {
+	case TRASLATING:
+		objects[selected_obj].M = translation_matrix;
+		break;
+	case ROTATING:
+		objects[selected_obj].M = rotation_matrix;
+		break;
+	case SCALING:
+		objects[selected_obj].M = scale_matrix;
+		break;
+	}
 }
 
 void generate_and_load_buffers(bool generate, Mesh* mesh)

@@ -4,18 +4,18 @@ C:\Users\stint\Desktop\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(644,61): warning 
 C:\Users\stint\Desktop\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(644,35): warning C4244: 'argument': conversion from 'GLfloat' to 'GLint', possible loss of data
 C:\Users\stint\Desktop\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(653,64): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
 C:\Users\stint\Desktop\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(671,12): warning C4244: 'initializing': conversion from 'GLfloat' to 'int', possible loss of data
-C:\Users\stint\Desktop\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(815,47): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\stint\Desktop\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(815,44): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\stint\Desktop\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(816,57): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\stint\Desktop\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(816,39): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\stint\Desktop\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(824,15): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\stint\Desktop\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(880,74): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\stint\Desktop\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(962,35): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\stint\Desktop\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(963,19): warning C4244: '=': conversion from 'double' to 'T', possible loss of data
+C:\Users\stint\Desktop\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(788,47): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\stint\Desktop\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(788,44): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\stint\Desktop\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(789,57): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\stint\Desktop\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(789,39): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\stint\Desktop\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(797,15): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\stint\Desktop\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(853,74): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\stint\Desktop\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(935,35): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\stint\Desktop\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(936,19): warning C4244: '=': conversion from 'double' to 'T', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\stint\Desktop\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(1223,57): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-C:\Users\stint\Desktop\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(1232,57): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+C:\Users\stint\Desktop\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(1177,57): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+C:\Users\stint\Desktop\CG\Laboratorio\LAB_03\LAB_03\LAB_03.cpp(1186,57): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
   LAB_03.vcxproj -> C:\Users\stint\Desktop\CG\Laboratorio\LAB_03\x64\Debug\LAB_03.exe
