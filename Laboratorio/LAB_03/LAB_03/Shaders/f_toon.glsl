@@ -33,7 +33,7 @@ void main() {
     vec3 lightDir = normalize(L);
 
     float diff = max(dot(norm, lightDir), 0.0);
-    float diffuse_factor = smoothstep(0.0, 0.8, diff);
+    float diffuse_factor = smoothstep(0.0, 0.0, diff);
     vec3 diffuse = light.power * light.color * diffuse_factor * material.diffuse;
 
     vec3 viewDir = normalize(E);
@@ -50,14 +50,20 @@ void main() {
 	if (intensity > 0.95){
 		result_buffer = vec3(shade_buffer[0],shade_buffer[1],shade_buffer[2]);
 	}
-	else if (intensity > 0.6){
+	else if (intensity > 0.70){
+		result_buffer = vec3(shade_buffer[0] - 0.1, shade_buffer[1] - 0.1, shade_buffer[2] - 0.1);
+	}
+	else if (intensity > 0.50){
 		result_buffer = vec3(shade_buffer[0] - 0.2, shade_buffer[1] - 0.2, shade_buffer[2] - 0.2);
 	}
-	else if (intensity > 0.35){
-		result_buffer = vec3(shade_buffer[0] - 0.4, shade_buffer[1] - 0.4, shade_buffer[2] - 0.4);
+	else if (intensity > 0.30){
+		result_buffer = vec3(shade_buffer[0] - 0.3, shade_buffer[1] - 0.3, shade_buffer[2] - 0.3);
 	}
-	else{
-		result_buffer = vec3(shade_buffer[0] - 0.6, shade_buffer[1] - 0.6, shade_buffer[2] - 0.6);
+	else if (intensity > 0.1){
+		result_buffer = vec3(shade_buffer[0] - 0.5, shade_buffer[1] - 0.5, shade_buffer[2] - 0.5);
+	}
+	else {
+		result_buffer = vec3(shade_buffer[0] - 0.4, shade_buffer[1] - 0.4, shade_buffer[2] - 0.4);
 	}
 	
     vec3 result = result_buffer;
