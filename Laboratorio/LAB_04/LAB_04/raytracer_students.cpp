@@ -108,6 +108,15 @@ RayTracer::TraceRay (Ray & ray, Hit & hit, int bounce_count) const
 	//     aggiungere ad answer il contributo riflesso
 	
 	// ----------------------------------------------
+	if (reflectiveColor.Length() != 0 && bounce_count > 0) {
+		Vec3f VRay = ray.getDirection();
+		Vec3f reflectiomRay = VRay - (2 * VRay.Dot3(normal) * normal);
+		reflectiomRay.Normalize();
+		Ray* new_ray = new Ray(point, reflectiomRay);
+
+		answer += TraceRay(*new_ray, hit, bounce_count - 1) * reflectiveColor;
+	}
+
 	// add each light
 	Hit* new_hit;
 	bool colpito;
@@ -125,6 +134,14 @@ RayTracer::TraceRay (Ray & ray, Hit & hit, int bounce_count) const
 	  Vec3f pointOnLight = f->computeCentroid ();
 	  Vec3f dirToLight = pointOnLight - point;
 	  dirToLight.Normalize ();
+	  // creare shadow ray verso il punto luce
+
+	// controllare il primo oggetto colpito da tale raggio
+
+	// se e' la sorgente luminosa i-esima allora
+	//	calcolare e aggiungere ad answer il contributo luminoso
+	// altrimenti
+	//    la luce i non contribuisce alla luminosita' di point.
 
 	  n_ray = new Ray(point, dirToLight);
 	  new_hit = new Hit();
