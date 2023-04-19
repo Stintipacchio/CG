@@ -109,6 +109,12 @@ RayTracer::TraceRay (Ray & ray, Hit & hit, int bounce_count) const
 	
 	// ----------------------------------------------
 	// add each light
+	Hit* new_hit;
+	bool colpito;
+	Ray* n_ray;
+	Vec3f n_point, dista, pointOnlight, dirToLight;
+
+
 	int num_lights = mesh->getLights ().size ();
 	for (int i = 0; i < num_lights; i++)
 	{
@@ -120,19 +126,21 @@ RayTracer::TraceRay (Ray & ray, Hit & hit, int bounce_count) const
 	  Vec3f dirToLight = pointOnLight - point;
 	  dirToLight.Normalize ();
 
-      // creare shadow ray verso il punto luce
-	  
-	  // controllare il primo oggetto colpito da tale raggio
+	  n_ray = new Ray(point, dirToLight);
+	  new_hit = new Hit();
+	  colpito = CastRay(*n_ray, *new_hit, false);
 
-	  // se e' la sorgente luminosa i-esima allora
-	  //	calcolare e aggiungere ad answer il contributo luminoso
-	  // altrimenti
-	  //    la luce i non contribuisce alla luminosita' di point.
+	  if (colpito) {
+		  n_point = n_ray->pointAtParameter(new_hit->getT());
+		  //calcola il vettore distanza  fra il punto colpito dal raggio e il punto sulla luce
+		  dista.Sub(dista, n_point, pointOnLight);
 
-	  if (normal.Dot3 (dirToLight) > 0)
-	  {
-		Vec3f lightColor = 0.2 * f->getMaterial ()->getEmittedColor () * f->getArea ();
-		answer += m->Shade (ray, hit, dirToLight, lightColor, args);
+		  if (dista.Length() < 0.01) {
+			  if(normal.Dot3(dirToLight) > 0){
+				  Vec3f lightColor = 0.2 * f->getMaterial()->getEmittedColor() * f->getArea();
+				  answer += m->Shade(ray, hit, dirToLight, lightColor, args);
+			  }
+		  }
 	  }
 	}
     

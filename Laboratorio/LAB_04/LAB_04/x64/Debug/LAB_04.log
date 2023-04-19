@@ -1,2 +1,8 @@
-﻿  sphere.cpp
+﻿  raytracer_students.cpp
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_04\LAB_04\mesh.h(37,1): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_04\LAB_04\mesh.h(71,1): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_04\LAB_04\mesh.h(91,1): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_04\LAB_04\raytracer_students.cpp(118,45): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_04\LAB_04\raytracer_students.cpp(140,68): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_04\LAB_04\face.h(52): warning C4715: 'Face::operator[]': not all control paths return a value
   LAB_04.vcxproj -> C:\Users\s0001097539\Desktop\GitHub\CG\Laboratorio\LAB_04\x64\Debug\LAB_04.exe
