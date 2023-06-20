@@ -31,8 +31,8 @@ const float altezzaPiattaforma = 0.05f;
 const int numeroPiattaforme = 10;
 
 
-GLuint quadratoVao;
-GLuint quadratoVbo;
+GLuint quadratoVao, platformVao;
+GLuint quadratoVbo, platformVbo;
 
 #include <vector>
 
@@ -85,16 +85,36 @@ void initializePlatforms() {
 
 
 void displayPlatforms() {
-    // Draw platforms
+    // Collega il VAO per le piattaforme
+    glBindVertexArray(quadratoVao);
+
+    // Itera sulle piattaforme
     for (const Platform& platform : platforms) {
-        glBegin(GL_QUADS);
-        glVertex2f(platform.x, platform.y);
-        glVertex2f(platform.x + platform.width, platform.y);
-        glVertex2f(platform.x + platform.width, platform.y + platform.height);
-        glVertex2f(platform.x, platform.y + platform.height);
-        glEnd();
+        // Calcola i vertici della piattaforma
+        GLfloat platformVertices[] = {
+            platform.x, platform.y,
+            platform.x + platform.width, platform.y,
+            platform.x + platform.width, platform.y + platform.height,
+            platform.x, platform.y + platform.height
+        };
+
+        // Collega il VBO per i vertici della piattaforma
+        glBindBuffer(GL_ARRAY_BUFFER, quadratoVbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(platformVertices), platformVertices, GL_STATIC_DRAW);
+
+        // Abilita l'array degli attributi dei vertici
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+        // Disegna la piattaforma
+        glDrawArrays(GL_QUADS, 0, 4);
     }
+
+    // Scollega il VAO e il VBO
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
+
 
 float getPlayerPlatformHeight(float playerX, float playerY) {
     for (Platform platform : platforms) {
@@ -199,6 +219,44 @@ void initializeVaoVbo() {
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+    // Inizializza il VAO e il VBO per le piattaforme
+    glGenVertexArrays(1, &platformVao);
+    glBindVertexArray(platformVao);
+
+    glGenBuffers(1, &platformVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, platformVbo);
+
+    // Calcola la dimensione totale del buffer dei dati
+    GLsizeiptr platformBufferSize = sizeof(GLfloat) * 4 * platforms.size();
+
+    // Alloca memoria per il buffer dei dati e copia i vertici delle piattaforme
+    GLfloat* platformBufferData = new GLfloat[platformBufferSize];
+    int platformBufferOffset = 0;
+    for (const Platform& platform : platforms) {
+        platformBufferData[platformBufferOffset++] = platform.x;
+        platformBufferData[platformBufferOffset++] = platform.y;
+        platformBufferData[platformBufferOffset++] = platform.x + platform.width;
+        platformBufferData[platformBufferOffset++] = platform.y;
+        platformBufferData[platformBufferOffset++] = platform.x + platform.width;
+        platformBufferData[platformBufferOffset++] = platform.y + platform.height;
+        platformBufferData[platformBufferOffset++] = platform.x;
+        platformBufferData[platformBufferOffset++] = platform.y + platform.height;
+    }
+
+    // Copia i dati nel buffer dei dati del VBO
+    glBufferData(GL_ARRAY_BUFFER, platformBufferSize, platformBufferData, GL_STATIC_DRAW);
+
+    // Libera la memoria allocata per il buffer dei dati
+    delete[] platformBufferData;
+
+    // Abilita l'array degli attributi dei vertici
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+    // Scollega il VAO e il VBO
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void updatePlayerInteractions() {
