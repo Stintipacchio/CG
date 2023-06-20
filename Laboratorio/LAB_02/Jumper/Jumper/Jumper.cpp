@@ -139,15 +139,15 @@ void displayPlatforms() {
 }
 
 
-float getPlayerPlatformHeight(float playerX, float playerY) {
-    float angolo_dx_player = playerX + PLAYER_WIDTH;
+float platforCollisionDetector(float objectX, float objectY, float object_width) {
+    float angolo_dx_player = objectX + object_width;
 
     for (Platform platform : platforms) {
-        if (playerY + platform.height > platform.y) platform.surpassed = true;
+        if (objectY + platform.height > platform.y) platform.surpassed = true;
         else platform.surpassed = false;
-        if (((playerX >= platform.x && playerX <= platform.x + platform.width) ||
+        if (((objectX >= platform.x && objectX <= platform.x + platform.width) ||
             (angolo_dx_player >= platform.x && angolo_dx_player <= platform.x + platform.width)) &&
-            playerY >= platform.y && playerY <= platform.y + platform.height && platform.surpassed) {
+            objectY >= platform.y && objectY <= platform.y + platform.height && platform.surpassed) {
             return platform.y + platform.height;
         }
     }
@@ -162,13 +162,13 @@ void PlayerGravityHandler() {
             PLAYER_SPEED_Y -= 0.001f;
         }
     }
-    if ((PLAYER_SPEED_Y < 0 && PLAYER_POSITION_Y > -0.9f) || getPlayerPlatformHeight(PLAYER_POSITION_X, PLAYER_POSITION_Y) == -0.9f) {
+    if ((PLAYER_SPEED_Y < 0 && PLAYER_POSITION_Y > -0.9f) || platforCollisionDetector(PLAYER_POSITION_X, PLAYER_POSITION_Y, PLAYER_WIDTH) == -0.9f) {
         PLAYER_POSITION_Y += PLAYER_SPEED_Y;
         if (PLAYER_SPEED_Y > -0.06f) {
             PLAYER_SPEED_Y -= 0.001f;
         }
     }
-    if (PLAYER_POSITION_Y < getPlayerPlatformHeight(PLAYER_POSITION_X, PLAYER_POSITION_Y)) {
+    if (PLAYER_POSITION_Y < platforCollisionDetector(PLAYER_POSITION_X, PLAYER_POSITION_Y, PLAYER_WIDTH)) {
         PLAYER_SPEED_Y = 0;
     }
 }
