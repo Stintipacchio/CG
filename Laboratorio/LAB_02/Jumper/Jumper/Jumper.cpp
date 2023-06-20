@@ -3,6 +3,8 @@
 #include <iostream>
 #include <vector>
 #include <random>
+#include <ctime>
+#include <cmath>
 
 #define SPACE_BAR 32
 
@@ -26,8 +28,6 @@ const float quadratoHeight = 0.1f;
 const float larghezzaPiattaforma = 0.5f;
 const float altezzaPiattaforma = 0.05f;
 const int numeroPiattaforme = 10;
-const int velocitaSalto = 12;
-const int gravita = 1;
 
 
 GLuint quadratoVao;
@@ -44,17 +44,39 @@ struct Platform {
 
 std::vector<Platform> platforms;
 
+bool isOverlapping(Platform platform1, Platform platform2) {
+    if (platform1.x < platform2.x + platform2.width &&
+        platform1.x + platform1.width > platform2.x &&
+        platform1.y < platform2.y + platform2.height &&
+        platform1.y + platform1.height > platform2.y) {
+        return true;
+    }
+    return false;
+}
+
 void initializePlatforms() {
-    // Initialize platforms with random positions and sizes
+    // Initialize platforms with random positions
+    srand(time(0));
     for (int i = 0; i < numeroPiattaforme; i++) {
         Platform platform;
-        platform.x = (rand() % 200 - 100) / 100.0f;
-        platform.y = (rand() % 200 - 100) / 100.0f;
-        platform.width = larghezzaPiattaforma;
-        platform.height = altezzaPiattaforma;
+        bool overlapping;
+        do {
+            overlapping = false;
+            platform.x = (rand() / (float)RAND_MAX) * 1.8f - 0.9f;
+            platform.y = (rand() / (float)RAND_MAX) * 1.8f - 0.9f;
+            platform.width = larghezzaPiattaforma;
+            platform.height = altezzaPiattaforma;
+            for (Platform existingPlatform : platforms) {
+                if (isOverlapping(platform, existingPlatform)) {
+                    overlapping = true;
+                    break;
+                }
+            }
+        } while (overlapping);
         platforms.push_back(platform);
     }
 }
+
 
 void displayPlatforms() {
     // Draw platforms
@@ -67,6 +89,19 @@ void displayPlatforms() {
         glEnd();
     }
 }
+
+float getPlayerPlatformHeight(float playerX, float playerY) {
+    for (Platform platform : platforms) {
+        if (playerX >= platform.x &&
+            playerX <= platform.x + platform.width &&
+            playerY >= platform.y &&
+            playerY <= platform.y + platform.height) {
+            return platform.y + platform.height;
+        }
+    }
+    return -0.9f;
+}
+
 
 void update(int value) {
     if (!game_over) {
@@ -104,15 +139,16 @@ void update(int value) {
             PLAYER_SPEED_Y -= 0.001f;
         }
     }
-    if (PLAYER_SPEED_Y < 0 && posizioneYGiocatore > -0.9f) {
+    if ((PLAYER_SPEED_Y < 0 && posizioneYGiocatore > -0.9f) || getPlayerPlatformHeight(posizioneXGiocatore, posizioneYGiocatore) == -0.9f) {
         posizioneYGiocatore += PLAYER_SPEED_Y;
         if (PLAYER_SPEED_Y > -0.06f) {
             PLAYER_SPEED_Y -= 0.001f;
         }
     }
-    if (posizioneYGiocatore <= -0.9f) {
+    if (posizioneYGiocatore < getPlayerPlatformHeight(posizioneXGiocatore, posizioneYGiocatore)) {
         PLAYER_SPEED_Y = 0;
     }
+    //else if ()
 
 
 
