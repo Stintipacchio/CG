@@ -1,3 +1,1 @@
-﻿  Jumper.cpp
-C:\Users\stint\Desktop\CG\Laboratorio\LAB_02\Jumper\Jumper\Jumper.cpp(65,15): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-  Jumper.vcxproj -> C:\Users\stint\Desktop\CG\Laboratorio\LAB_02\Jumper\x64\Debug\Jumper.exe
+﻿  Jumper.vcxproj -> C:\Users\stint\Desktop\CG\Laboratorio\LAB_02\Jumper\x64\Debug\Jumper.exe

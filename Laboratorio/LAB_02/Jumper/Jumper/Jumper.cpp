@@ -280,15 +280,35 @@ void updatePlayerInteractions() {
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
-    glBindVertexArray(playerVao);
-    glColor3f(1.0f, 1.0f, 0.0f);
-    glDrawArrays(GL_QUADS, 0, 4);
-    displayPlatforms();
 
-    //std::cout << "Punteggio: " << punteggio << std::endl;
+    // Disegna il giocatore
+    glBindVertexArray(playerVao);
+    glColor3f(1.0f, 0.0f, 0.0f); // Imposta il colore a rosso
+    glDrawArrays(GL_QUADS, 0, 4);
+
+    // Disegna le piattaforme
+    glBindVertexArray(platformVao);
+    glColor3f(1.0f, 1.0f, 0.0f); // Imposta il colore a giallo
+
+    // Itera sulle piattaforme e disegna ciascuna di esse
+    for (const Platform& platform : platforms) {
+        GLfloat platformVertices[] = {
+            platform.x, platform.y,
+            platform.x + platform.width, platform.y,
+            platform.x + platform.width, platform.y + platform.height,
+            platform.x, platform.y + platform.height
+        };
+
+        glBindBuffer(GL_ARRAY_BUFFER, platformVbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(platformVertices), platformVertices, GL_STATIC_DRAW);
+
+        glDrawArrays(GL_QUADS, 0, 4);
+    }
+
     updatePlayerInteractions();
     glutSwapBuffers();
 }
+
 
 void keyboard(unsigned char key, int x, int y) {
     switch (key) {
