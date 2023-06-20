@@ -140,17 +140,19 @@ void displayPlatforms() {
 
 
 float getPlayerPlatformHeight(float playerX, float playerY) {
+    float angolo_dx_player = playerX + PLAYER_WIDTH;
+
     for (Platform platform : platforms) {
         if (playerY + platform.height > platform.y) platform.surpassed = true;
         else platform.surpassed = false;
-        if ((playerX >= platform.x &&
-            playerX <= platform.x + platform.width &&
-            playerY >= platform.y &&
-            playerY <= platform.y + platform.height) && platform.surpassed) {
+        if (((playerX >= platform.x && playerX <= platform.x + platform.width) ||
+            (angolo_dx_player >= platform.x && angolo_dx_player <= platform.x + platform.width)) &&
+            playerY >= platform.y && playerY <= platform.y + platform.height && platform.surpassed) {
             return platform.y + platform.height;
         }
     }
     return -0.9f;
+
 }
 
 void PlayerGravityHandler() {
