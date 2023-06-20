@@ -12,10 +12,12 @@ float PLAYER_SPEED_X = 0;
 
 float PLAYER_SPEED_Y = 0;
 
+float PLAYER_ACCELERATION = 0.03f;
+
 bool aKeyIsDown = false;
 bool dKeyIsDown = false;
 bool spaceBarIsDown = false;
-bool fKeyIsDown = false;
+int tmp_direction = 1;
 
 int punteggio = 0;
 bool game_over = false;
@@ -28,11 +30,11 @@ const float PLAYER_WIDTH = 0.1f;
 const float PLAYER_HEIGHT = 0.2f;
 const float larghezzaPiattaforma = 0.5f;
 const float altezzaPiattaforma = 0.05f;
-const int numeroPiattaforme = 10;
+const int numeroPiattaforme = 6;
 
 
-GLuint playerVao, platformVao;
-GLuint playerVbo, platformVbo;
+GLuint playerVao, platformVao, bulletVao;
+GLuint playerVbo, platformVbo, bulletVbo;
 
 #include <vector>
 
@@ -45,6 +47,16 @@ struct Platform {
 };
 
 std::vector<Platform> platforms;
+
+struct Bullet {
+    float x;
+    float y;
+    float speed;
+    bool isActive;
+    int direction;
+};
+
+std::vector<Bullet> bullets;
 
 void jump() {
     PLAYER_SPEED_Y += 0.04f;
@@ -63,6 +75,16 @@ bool isOverlapping(Platform platform1, Platform platform2) {
 void initializePlatforms() {
     // Initialize platforms with random positions
     srand(time(0));
+
+    // Create a base platform
+    Platform basePlatform;
+    basePlatform.x = -1.0f;  // Posizione x iniziale
+    basePlatform.y = -0.9f;  // Posizione y
+    basePlatform.width = 2.0f;  // Larghezza dello schermo
+    basePlatform.height = altezzaPiattaforma;  // Altezza della piattaforma
+
+    platforms.push_back(basePlatform);
+
     for (int i = 0; i < numeroPiattaforme; i++) {
         Platform platform;
         bool overlapping;
@@ -82,6 +104,7 @@ void initializePlatforms() {
         platforms.push_back(platform);
     }
 }
+
 
 
 void displayPlatforms() {
@@ -118,7 +141,7 @@ void displayPlatforms() {
 
 float getPlayerPlatformHeight(float playerX, float playerY) {
     for (Platform platform : platforms) {
-        if (playerY > platform.y) platform.surpassed = true;
+        if (playerY + platform.height > platform.y) platform.surpassed = true;
         else platform.surpassed = false;
         if ((playerX >= platform.x &&
             playerX <= platform.x + platform.width &&
@@ -129,6 +152,7 @@ float getPlayerPlatformHeight(float playerX, float playerY) {
     }
     return -0.9f;
 }
+
 void PlayerGravityHandler() {
     if (PLAYER_SPEED_Y > 0) {
         PLAYER_POSITION_Y += PLAYER_SPEED_Y;
@@ -165,6 +189,39 @@ void PlayerInertiaHandler() {
     }
 }
 
+void shootBullet() {
+    // Crea un nuovo proiettile
+    Bullet newBullet;
+
+    // Imposta la posizione e la velocità del proiettile iniziale
+    if (tmp_direction == 1) {
+        newBullet.x = PLAYER_POSITION_X + PLAYER_WIDTH * 0.8;
+    }
+    else newBullet.x = PLAYER_POSITION_X - (PLAYER_WIDTH * (2/3));
+    newBullet.y = PLAYER_POSITION_Y + PLAYER_HEIGHT/2;
+    newBullet.speed = 0.02f;
+    newBullet.isActive = true;
+
+    // Imposta la direzione dello sparo in base all'ultimo input dell'utente
+    newBullet.direction = tmp_direction; // 1 se è stato premuto "d", -1 se è stato premuto "a"
+
+    // Aggiungi il nuovo proiettile al vettore dei proiettili
+    bullets.push_back(newBullet);
+}
+
+
+void bulletMovementHandler() {
+    // Muove i proiettili verso destra o sinistra
+    for (Bullet& bullet : bullets) {
+        if (bullet.isActive) {
+            bullet.x += (bullet.speed * bullet.direction); // Muovi il proiettile in base alla direzione dello sparo
+            if (bullet.x > 1.0f || bullet.x < -1.0f) {
+                bullet.isActive = false; // Disattiva il proiettile se esce dallo schermo
+            }
+        }
+    }
+}
+
 void update(int value) {
     if (!game_over) {
 
@@ -181,6 +238,9 @@ void update(int value) {
 
         //Spostamento verticale e gravità
         PlayerGravityHandler();
+
+    // Aggiorna la posizione del proiettile
+    bulletMovementHandler();
 
     // Ridisegna il quadrato
     glBindVertexArray(playerVao);
@@ -199,6 +259,52 @@ void update(int value) {
     glutPostRedisplay();
     glutTimerFunc(16, update, 0);
 }
+
+void drawBullets() {
+    // Colore del proiettile
+    glColor3f(0.0f, 0.0f, 1.0f);
+
+    // Dimensioni del proiettile
+    const float bulletWidth = 0.02f;
+    const float bulletHeight = 0.04f;
+
+    for (const auto& bullet : bullets) {
+        if (bullet.isActive) {
+            // Calcola i vertici del proiettile
+            GLfloat bulletVertices[] = {
+                bullet.x, bullet.y,
+                bullet.x + bulletWidth, bullet.y,
+                bullet.x + bulletWidth, bullet.y + bulletHeight,
+                bullet.x, bullet.y + bulletHeight
+            };
+
+            // Genera e bind del Vertex Array Object (VAO) per il proiettile
+            GLuint bulletVao;
+            glGenVertexArrays(1, &bulletVao);
+            glBindVertexArray(bulletVao);
+
+            // Genera e bind del Vertex Buffer Object (VBO) per i vertici del proiettile
+            GLuint bulletVbo;
+            glGenBuffers(1, &bulletVbo);
+            glBindBuffer(GL_ARRAY_BUFFER, bulletVbo);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(bulletVertices), bulletVertices, GL_STATIC_DRAW);
+
+            // Imposta l'attributo di posizione del proiettile
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+            // Disegna il proiettile
+            glDrawArrays(GL_QUADS, 0, 4);
+
+            // Pulizia delle risorse
+            glDisableVertexAttribArray(0);
+            glDeleteBuffers(1, &bulletVbo);
+            glDeleteVertexArrays(1, &bulletVao);
+        }
+    }
+}
+
+
 
 void initializeVaoVbo() {
     // Inizializza il VAO e il VBO per il quadrato
@@ -262,12 +368,12 @@ void initializeVaoVbo() {
 void updatePlayerInteractions() {
     if (aKeyIsDown) {
         if (PLAYER_POSITION_X > -0.9f && PLAYER_SPEED_X > -0.02f) {
-            PLAYER_SPEED_X -= 0.06f;
+            PLAYER_SPEED_X -= PLAYER_ACCELERATION;
         }
     }
     if (dKeyIsDown) {
         if (PLAYER_POSITION_X < 0.8f && PLAYER_SPEED_X < 0.02f) {
-            PLAYER_SPEED_X += 0.06f;
+            PLAYER_SPEED_X += PLAYER_ACCELERATION;
         }
     }
     if (spaceBarIsDown) {
@@ -305,6 +411,9 @@ void display() {
         glDrawArrays(GL_QUADS, 0, 4);
     }
 
+    // Disegna i proiettili sparati dal giocatore
+    drawBullets();
+
     updatePlayerInteractions();
     glutSwapBuffers();
 }
@@ -314,10 +423,12 @@ void keyboard(unsigned char key, int x, int y) {
     switch (key) {
     case 'a':
     case 'A':
+        tmp_direction = -1;
         aKeyIsDown = true;
         break;
     case 'd':
     case 'D':
+        tmp_direction = 1;
         dKeyIsDown = true;
         break;
     case SPACE_BAR:
@@ -325,7 +436,7 @@ void keyboard(unsigned char key, int x, int y) {
         break;
     case 'f':
     case 'F':
-        fKeyIsDown = true;
+        shootBullet();
         break;
     }
 }
@@ -342,10 +453,6 @@ void keyboardUp(unsigned char key, int x, int y) {
         break;
     case SPACE_BAR:
         spaceBarIsDown = false;
-        break;
-    case 'f':
-    case 'F':
-        fKeyIsDown = false;
         break;
     }
 }
