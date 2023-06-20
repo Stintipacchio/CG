@@ -15,16 +15,17 @@ float PLAYER_SPEED_Y = 0;
 bool aKeyIsDown = false;
 bool dKeyIsDown = false;
 bool spaceBarIsDown = false;
+bool fKeyIsDown = false;
 
 int punteggio = 0;
 bool game_over = false;
 
 
-float posizioneXGiocatore = 0.0f;
-float posizioneYGiocatore = -0.9f;
+float PLAYER_POSITION_X = 0.0f;
+float PLAYER_POSITION_Y = -0.9f;
 
-const float quadratoWidth = 0.1f;
-const float quadratoHeight = 0.1f;
+const float PLAYER_WIDTH = 0.1f;
+const float PLAYER_HEIGHT = 0.2f;
 const float larghezzaPiattaforma = 0.5f;
 const float altezzaPiattaforma = 0.05f;
 const int numeroPiattaforme = 10;
@@ -40,9 +41,14 @@ struct Platform {
     float y;
     float width;
     float height;
+    bool surpassed = false;
 };
 
 std::vector<Platform> platforms;
+
+void jump() {
+    PLAYER_SPEED_Y += 0.04f;
+}
 
 bool isOverlapping(Platform platform1, Platform platform2) {
     if (platform1.x < platform2.x + platform2.width &&
@@ -92,16 +98,52 @@ void displayPlatforms() {
 
 float getPlayerPlatformHeight(float playerX, float playerY) {
     for (Platform platform : platforms) {
-        if (playerX >= platform.x &&
+        if (playerY > platform.y) platform.surpassed = true;
+        else platform.surpassed = false;
+        if ((playerX >= platform.x &&
             playerX <= platform.x + platform.width &&
             playerY >= platform.y &&
-            playerY <= platform.y + platform.height) {
+            playerY <= platform.y + platform.height) && platform.surpassed) {
             return platform.y + platform.height;
         }
     }
     return -0.9f;
 }
+void PlayerGravityHandler() {
+    if (PLAYER_SPEED_Y > 0) {
+        PLAYER_POSITION_Y += PLAYER_SPEED_Y;
+        if (PLAYER_SPEED_Y > 0) {
+            PLAYER_SPEED_Y -= 0.001f;
+        }
+    }
+    if ((PLAYER_SPEED_Y < 0 && PLAYER_POSITION_Y > -0.9f) || getPlayerPlatformHeight(PLAYER_POSITION_X, PLAYER_POSITION_Y) == -0.9f) {
+        PLAYER_POSITION_Y += PLAYER_SPEED_Y;
+        if (PLAYER_SPEED_Y > -0.06f) {
+            PLAYER_SPEED_Y -= 0.001f;
+        }
+    }
+    if (PLAYER_POSITION_Y < getPlayerPlatformHeight(PLAYER_POSITION_X, PLAYER_POSITION_Y)) {
+        PLAYER_SPEED_Y = 0;
+    }
+}
 
+void PlayerInertiaHandler() {
+    if (PLAYER_SPEED_X > 0) {
+        PLAYER_POSITION_X += PLAYER_SPEED_X;
+        if (PLAYER_SPEED_X > 0) {
+            PLAYER_SPEED_X -= 0.003f;
+        }
+    }
+    if (PLAYER_SPEED_X < 0) {
+        PLAYER_POSITION_X += PLAYER_SPEED_X;
+        if (PLAYER_SPEED_X < 0) {
+            PLAYER_SPEED_X += 0.003f;
+        }
+    }
+    if ((PLAYER_SPEED_X < 0.005f && PLAYER_SPEED_X > -0.005f) || (PLAYER_POSITION_X > 0.09f || PLAYER_POSITION_X < -0.09f)) {
+        PLAYER_SPEED_X = 0;
+    }
+}
 
 void update(int value) {
     if (!game_over) {
@@ -109,58 +151,26 @@ void update(int value) {
 
     }
 
-
     if (punteggio >= 1000) {
         game_over = true;
     }
 
     // Aggiorna la posizione del giocatore
-    //Spostamento orizzontale
-    if (PLAYER_SPEED_X > 0) {
-        posizioneXGiocatore += PLAYER_SPEED_X;
-        if (PLAYER_SPEED_X > 0) {
-            PLAYER_SPEED_X -= 0.003f;
-        }
-    }
-    if (PLAYER_SPEED_X < 0) {
-        posizioneXGiocatore += PLAYER_SPEED_X;
-        if (PLAYER_SPEED_X < 0) {
-            PLAYER_SPEED_X += 0.003f;
-        }
-    }
-    if ((PLAYER_SPEED_X < 0.005f && PLAYER_SPEED_X > -0.005f) || (posizioneXGiocatore > 0.09f || posizioneXGiocatore < -0.09f)) {
-        PLAYER_SPEED_X = 0;
-    }
+        //Spostamento orizzontale
+        PlayerInertiaHandler();
 
-    //Spostamento verticale e gravità
-    if (PLAYER_SPEED_Y > 0) {
-        posizioneYGiocatore += PLAYER_SPEED_Y;
-        if (PLAYER_SPEED_Y > 0) {
-            PLAYER_SPEED_Y -= 0.001f;
-        }
-    }
-    if ((PLAYER_SPEED_Y < 0 && posizioneYGiocatore > -0.9f) || getPlayerPlatformHeight(posizioneXGiocatore, posizioneYGiocatore) == -0.9f) {
-        posizioneYGiocatore += PLAYER_SPEED_Y;
-        if (PLAYER_SPEED_Y > -0.06f) {
-            PLAYER_SPEED_Y -= 0.001f;
-        }
-    }
-    if (posizioneYGiocatore < getPlayerPlatformHeight(posizioneXGiocatore, posizioneYGiocatore)) {
-        PLAYER_SPEED_Y = 0;
-    }
-    //else if ()
-
-
+        //Spostamento verticale e gravità
+        PlayerGravityHandler();
 
     // Ridisegna il quadrato
     glBindVertexArray(quadratoVao);
     glBindBuffer(GL_ARRAY_BUFFER, quadratoVbo);
 
     GLfloat quadratoVertices[] = {
-        posizioneXGiocatore, posizioneYGiocatore,
-        posizioneXGiocatore + quadratoWidth, posizioneYGiocatore,
-        posizioneXGiocatore + quadratoWidth, posizioneYGiocatore + quadratoHeight,
-        posizioneXGiocatore, posizioneYGiocatore + quadratoHeight
+        PLAYER_POSITION_X, PLAYER_POSITION_Y,
+        PLAYER_POSITION_X + PLAYER_WIDTH, PLAYER_POSITION_Y,
+        PLAYER_POSITION_X + PLAYER_WIDTH, PLAYER_POSITION_Y + PLAYER_HEIGHT,
+        PLAYER_POSITION_X, PLAYER_POSITION_Y + PLAYER_HEIGHT
     };
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(quadratoVertices), quadratoVertices, GL_STATIC_DRAW);
@@ -179,10 +189,10 @@ void initializeVaoVbo() {
     glBindBuffer(GL_ARRAY_BUFFER, quadratoVbo);
 
     GLfloat quadratoVertices[] = {
-        posizioneXGiocatore, posizioneYGiocatore,
-        posizioneXGiocatore + quadratoWidth, posizioneYGiocatore,
-        posizioneXGiocatore + quadratoWidth, posizioneYGiocatore + quadratoHeight,
-        posizioneXGiocatore, posizioneYGiocatore + quadratoHeight
+        PLAYER_POSITION_X, PLAYER_POSITION_Y,
+        PLAYER_POSITION_X + PLAYER_WIDTH, PLAYER_POSITION_Y,
+        PLAYER_POSITION_X + PLAYER_WIDTH, PLAYER_POSITION_Y + PLAYER_HEIGHT,
+        PLAYER_POSITION_X, PLAYER_POSITION_Y + PLAYER_HEIGHT
     };
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(quadratoVertices), quadratoVertices, GL_STATIC_DRAW);
@@ -191,20 +201,20 @@ void initializeVaoVbo() {
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 }
 
-void updatePlayerSpeed() {
+void updatePlayerInteractions() {
     if (aKeyIsDown) {
-        if (posizioneXGiocatore > -0.9f && PLAYER_SPEED_X > -0.02f) {
+        if (PLAYER_POSITION_X > -0.9f && PLAYER_SPEED_X > -0.02f) {
             PLAYER_SPEED_X -= 0.06f;
         }
     }
     if (dKeyIsDown) {
-        if (posizioneXGiocatore < 0.8f && PLAYER_SPEED_X < 0.02f) {
+        if (PLAYER_POSITION_X < 0.8f && PLAYER_SPEED_X < 0.02f) {
             PLAYER_SPEED_X += 0.06f;
         }
     }
     if (spaceBarIsDown) {
         if (PLAYER_SPEED_Y == 0) {
-            PLAYER_SPEED_Y += 0.04f;
+            jump();
         }
     }
 }
@@ -218,7 +228,7 @@ void display() {
     displayPlatforms();
 
     //std::cout << "Punteggio: " << punteggio << std::endl;
-    updatePlayerSpeed();
+    updatePlayerInteractions();
     glutSwapBuffers();
 }
 
@@ -234,6 +244,10 @@ void keyboard(unsigned char key, int x, int y) {
         break;
     case SPACE_BAR:
         spaceBarIsDown = true;
+        break;
+    case 'f':
+    case 'F':
+        fKeyIsDown = true;
         break;
     }
 }
@@ -251,6 +265,10 @@ void keyboardUp(unsigned char key, int x, int y) {
     case SPACE_BAR:
         spaceBarIsDown = false;
         break;
+    case 'f':
+    case 'F':
+        fKeyIsDown = false;
+        break;
     }
 }
 
@@ -267,7 +285,7 @@ void reshape(int width, int height) {
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-    glutInitWindowSize(400, 400);
+    glutInitWindowSize(600, 480);
     glutCreateWindow("Jumper");
 
     glewInit();
