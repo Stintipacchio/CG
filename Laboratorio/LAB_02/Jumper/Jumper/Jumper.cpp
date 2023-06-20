@@ -31,8 +31,8 @@ const float altezzaPiattaforma = 0.05f;
 const int numeroPiattaforme = 10;
 
 
-GLuint quadratoVao, platformVao;
-GLuint quadratoVbo, platformVbo;
+GLuint playerVao, platformVao;
+GLuint playerVbo, platformVbo;
 
 #include <vector>
 
@@ -86,7 +86,7 @@ void initializePlatforms() {
 
 void displayPlatforms() {
     // Collega il VAO per le piattaforme
-    glBindVertexArray(quadratoVao);
+    glBindVertexArray(playerVao);
 
     // Itera sulle piattaforme
     for (const Platform& platform : platforms) {
@@ -99,7 +99,7 @@ void displayPlatforms() {
         };
 
         // Collega il VBO per i vertici della piattaforma
-        glBindBuffer(GL_ARRAY_BUFFER, quadratoVbo);
+        glBindBuffer(GL_ARRAY_BUFFER, playerVbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(platformVertices), platformVertices, GL_STATIC_DRAW);
 
         // Abilita l'array degli attributi dei vertici
@@ -183,17 +183,17 @@ void update(int value) {
         PlayerGravityHandler();
 
     // Ridisegna il quadrato
-    glBindVertexArray(quadratoVao);
-    glBindBuffer(GL_ARRAY_BUFFER, quadratoVbo);
+    glBindVertexArray(playerVao);
+    glBindBuffer(GL_ARRAY_BUFFER, playerVbo);
 
-    GLfloat quadratoVertices[] = {
+    GLfloat PLAYER_VERTICES[] = {
         PLAYER_POSITION_X, PLAYER_POSITION_Y,
         PLAYER_POSITION_X + PLAYER_WIDTH, PLAYER_POSITION_Y,
         PLAYER_POSITION_X + PLAYER_WIDTH, PLAYER_POSITION_Y + PLAYER_HEIGHT,
         PLAYER_POSITION_X, PLAYER_POSITION_Y + PLAYER_HEIGHT
     };
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadratoVertices), quadratoVertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(PLAYER_VERTICES), PLAYER_VERTICES, GL_STATIC_DRAW);
 
     // Richiede il ridisegno della scena
     glutPostRedisplay();
@@ -202,20 +202,20 @@ void update(int value) {
 
 void initializeVaoVbo() {
     // Inizializza il VAO e il VBO per il quadrato
-    glGenVertexArrays(1, &quadratoVao);
-    glBindVertexArray(quadratoVao);
+    glGenVertexArrays(1, &playerVao);
+    glBindVertexArray(playerVao);
 
-    glGenBuffers(1, &quadratoVbo);
-    glBindBuffer(GL_ARRAY_BUFFER, quadratoVbo);
+    glGenBuffers(1, &playerVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, playerVbo);
 
-    GLfloat quadratoVertices[] = {
+    GLfloat PLAYER_VERTICES[] = {
         PLAYER_POSITION_X, PLAYER_POSITION_Y,
         PLAYER_POSITION_X + PLAYER_WIDTH, PLAYER_POSITION_Y,
         PLAYER_POSITION_X + PLAYER_WIDTH, PLAYER_POSITION_Y + PLAYER_HEIGHT,
         PLAYER_POSITION_X, PLAYER_POSITION_Y + PLAYER_HEIGHT
     };
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadratoVertices), quadratoVertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(PLAYER_VERTICES), PLAYER_VERTICES, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
@@ -280,7 +280,7 @@ void updatePlayerInteractions() {
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
-    glBindVertexArray(quadratoVao);
+    glBindVertexArray(playerVao);
     glColor3f(1.0f, 1.0f, 0.0f);
     glDrawArrays(GL_QUADS, 0, 4);
     displayPlatforms();
