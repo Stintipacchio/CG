@@ -79,7 +79,7 @@ void initializePlatforms() {
     // Create a base platform
     Platform basePlatform;
     basePlatform.x = -1.0f;  // Posizione x iniziale
-    basePlatform.y = -0.9f;  // Posizione y
+    basePlatform.y = -0.95f;  // Posizione y
     basePlatform.width = 2.0f;  // Larghezza dello schermo
     basePlatform.height = altezzaPiattaforma;  // Altezza della piattaforma
 
