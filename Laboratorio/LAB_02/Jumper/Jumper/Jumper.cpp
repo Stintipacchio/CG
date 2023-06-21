@@ -26,7 +26,7 @@ bool game_over = false;
 float PLAYER_POSITION_X = 0.0f;
 float PLAYER_POSITION_Y = -0.9f;
 const float PLAYER_WIDTH = 0.05f;
-const float PLAYER_HEIGHT = 0.1f;
+const float PLAYER_HEIGHT = 0.2f;
 const float PLAYER_JUMP_FORCE = 0.04f;
 
 
@@ -56,6 +56,8 @@ struct Bullet {
     float speed;
     bool isActive;
     int direction;
+    float width = 0.02f;
+    float height = 0.04f;
 };
 
 std::vector<Bullet> bullets;
@@ -87,7 +89,6 @@ float platforCollisionDetector(float objectX, float objectY, float object_width)
         }
     }
     return -0.9f;
-
 }
 
 void ObjectGravityHandler(float& objectX, float& objectY, float& object_speedY, float object_width) {
@@ -191,36 +192,38 @@ void drawEnemies() {
 
 
     for (const auto& enemy : enemies) {
-        // Calcola i vertici del nemico
-        GLfloat enemyVertices[] = {
-            enemy.x, enemy.y,
-            enemy.x + enemy.width, enemy.y,
-            enemy.x + enemy.width, enemy.y + enemy.height,
-            enemy.x, enemy.y + enemy.height
-        };
+        if (enemy.alive) {
+            // Calcola i vertici del nemico
+            GLfloat enemyVertices[] = {
+                enemy.x, enemy.y,
+                enemy.x + enemy.width, enemy.y,
+                enemy.x + enemy.width, enemy.y + enemy.height,
+                enemy.x, enemy.y + enemy.height
+            };
 
-        // Genera e bind del Vertex Array Object (VAO) per il nemico
-        GLuint enemyVao;
-        glGenVertexArrays(1, &enemyVao);
-        glBindVertexArray(enemyVao);
+            // Genera e bind del Vertex Array Object (VAO) per il nemico
+            GLuint enemyVao;
+            glGenVertexArrays(1, &enemyVao);
+            glBindVertexArray(enemyVao);
 
-        // Genera e bind del Vertex Buffer Object (VBO) per i vertici del nemico
-        GLuint enemyVbo;
-        glGenBuffers(1, &enemyVbo);
-        glBindBuffer(GL_ARRAY_BUFFER, enemyVbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(enemyVertices), enemyVertices, GL_STATIC_DRAW);
+            // Genera e bind del Vertex Buffer Object (VBO) per i vertici del nemico
+            GLuint enemyVbo;
+            glGenBuffers(1, &enemyVbo);
+            glBindBuffer(GL_ARRAY_BUFFER, enemyVbo);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(enemyVertices), enemyVertices, GL_STATIC_DRAW);
 
-        // Imposta l'attributo di posizione del nemico
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+            // Imposta l'attributo di posizione del nemico
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 
-        // Disegna il nemico
-        glDrawArrays(GL_QUADS, 0, 4);
+            // Disegna il nemico
+            glDrawArrays(GL_QUADS, 0, 4);
 
-        // Pulizia delle risorse
-        glDisableVertexAttribArray(0);
-        glDeleteBuffers(1, &enemyVbo);
-        glDeleteVertexArrays(1, &enemyVao);
+            // Pulizia delle risorse
+            glDisableVertexAttribArray(0);
+            glDeleteBuffers(1, &enemyVbo);
+            glDeleteVertexArrays(1, &enemyVao);
+        }
     }
 }
 
@@ -325,12 +328,57 @@ void shootBullet() {
 
 void bulletMovementHandler() {
     // Muove i proiettili verso destra o sinistra
-    for (Bullet& bullet : bullets) {
-        if (bullet.isActive) {
-            bullet.x += (bullet.speed * bullet.direction); // Muovi il proiettile in base alla direzione dello sparo
-            if (bullet.x > 1.0f || bullet.x < -1.0f) {
-                bullet.isActive = false; // Disattiva il proiettile se esce dallo schermo
+    for (auto bulletIt = bullets.begin(); bulletIt != bullets.end(); /* empty */) {
+        if (bulletIt->isActive) {
+            bulletIt->x += (bulletIt->speed * bulletIt->direction); // Muovi il proiettile in base alla direzione dello sparo
+            if (bulletIt->x > 1.0f || bulletIt->x < -1.0f) {
+                bulletIt = bullets.erase(bulletIt); // Rimuovi il proiettile dagli array
+            } else {
+                ++bulletIt;
             }
+        } else {
+            ++bulletIt;
+        }
+    }
+}
+
+
+void checkBulletCollision() {
+    for (auto bulletIt = bullets.begin(); bulletIt != bullets.end(); /* empty */) {
+        bool bulletDeleted = false;
+
+        for (auto enemyIt = enemies.begin(); enemyIt != enemies.end(); /* empty */) {
+            if (bulletIt->x < enemyIt->x + enemyIt->width &&
+                bulletIt->x + bulletIt->width > enemyIt->x &&
+                bulletIt->y < enemyIt->y + enemyIt->height &&
+                bulletIt->y + bulletIt->height > enemyIt->y) {
+
+                bulletDeleted = true;
+                enemyIt = enemies.erase(enemyIt);
+                punteggio += 100;
+            }
+            else {
+                ++enemyIt;
+            }
+        }
+
+        if (bulletDeleted) {
+            bulletIt = bullets.erase(bulletIt);
+        }
+        else {
+            ++bulletIt;
+        }
+    }
+}
+
+void checkPlayerEnemyCollison() {
+    for (Enemy& enemy : enemies) {
+        if (PLAYER_POSITION_X < enemy.x + enemy.width &&
+            PLAYER_POSITION_X + PLAYER_WIDTH > enemy.x &&
+            PLAYER_POSITION_Y < enemy.y + enemy.height &&
+            PLAYER_POSITION_Y + PLAYER_HEIGHT > enemy.y) {
+
+            game_over = true;
         }
     }
 }
@@ -355,8 +403,12 @@ void update(int value) {
     // Aggiorna la posizione del proiettile
     bulletMovementHandler();
 
+    checkBulletCollision();
+
+    checkPlayerEnemyCollison();
+
     // Aggiorna la posizione dei nemici
-    moveEnemies();
+    //moveEnemies();
 
     // Richiede il ridisegno della scena
     glutPostRedisplay();
@@ -409,18 +461,15 @@ void drawBullets() {
     // Colore del proiettile
     glColor3f(0.0f, 0.0f, 1.0f);
 
-    // Dimensioni del proiettile
-    const float bulletWidth = 0.02f;
-    const float bulletHeight = 0.04f;
 
     for (const auto& bullet : bullets) {
         if (bullet.isActive) {
             // Calcola i vertici del proiettile
             GLfloat bulletVertices[] = {
                 bullet.x, bullet.y,
-                bullet.x + bulletWidth, bullet.y,
-                bullet.x + bulletWidth, bullet.y + bulletHeight,
-                bullet.x, bullet.y + bulletHeight
+                bullet.x + bullet.width, bullet.y,
+                bullet.x + bullet.width, bullet.y + bullet.height,
+                bullet.x, bullet.y + bullet.height
             };
 
             // Genera e bind del Vertex Array Object (VAO) per il proiettile

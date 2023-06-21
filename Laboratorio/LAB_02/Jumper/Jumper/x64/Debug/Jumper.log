@@ -1,5 +1,6 @@
 ﻿  Jumper.cpp
-C:\Users\stint\Desktop\CG\Laboratorio\LAB_02\Jumper\Jumper\Jumper.cpp(158,44): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\stint\Desktop\CG\Laboratorio\LAB_02\Jumper\Jumper\Jumper.cpp(240,15): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-C:\Users\stint\Desktop\CG\Laboratorio\LAB_02\Jumper\Jumper\Jumper.cpp(311,41): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\stint\Desktop\CG\Laboratorio\LAB_02\Jumper\Jumper\Jumper.cpp(159,44): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\stint\Desktop\CG\Laboratorio\LAB_02\Jumper\Jumper\Jumper.cpp(243,15): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\stint\Desktop\CG\Laboratorio\LAB_02\Jumper\Jumper\Jumper.cpp(314,41): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+glew32sd.lib(glew.obj) : warning LNK4099: PDB '' was not found with 'glew32sd.lib(glew.obj)' or at ''; linking object as if no debug info
   Jumper.vcxproj -> C:\Users\stint\Desktop\CG\Laboratorio\LAB_02\Jumper\x64\Debug\Jumper.exe
