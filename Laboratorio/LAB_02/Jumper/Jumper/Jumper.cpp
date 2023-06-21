@@ -11,7 +11,7 @@
 
 #define SPACE_BAR 32
 
-bool pausa = false;
+bool pausa = true;
 
 float PLAYER_SPEED_X = 0;
 
@@ -76,9 +76,9 @@ struct Enemy {
     float y;
     float width;
     float height;
-    float speedX = 0;
-    float speedY = 0;
-    float acceleration = 0;
+    float speedX = 0.0f;
+    float speedY = 0.0f;
+    float acceleration = 0.0f;
     float jumpForce;
     bool alive = true;
 };
@@ -296,7 +296,7 @@ void initializePlatforms() {
         do {
             overlapping = false;
             platform.x = (rand() / (float)RAND_MAX) * 1.8f - 0.9f;
-            platform.y = (rand() / (float)RAND_MAX) * 1.8f - 0.9f;
+            platform.y = (rand() / (float)RAND_MAX) * 1.0f - 0.7f;
             platform.width = larghezzaPiattaforma;
             platform.height = altezzaPiattaforma;
             for (Platform existingPlatform : platforms) {
@@ -442,7 +442,7 @@ void update(int value) {
         // Aggiorna la posizione dei nemici
         moveEnemies();
 
-        enemiesSpawner();
+        //enemiesSpawner();
     }
         // Richiede il ridisegno della scena
         glutPostRedisplay();
@@ -660,7 +660,7 @@ void display() {
         GameOver();
     }
 
-    if (pausa) {
+    if (pausa && !game_over) {
         Pausa();
     }
 
