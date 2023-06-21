@@ -33,8 +33,8 @@ const float altezzaPiattaforma = 0.05f;
 const int numeroPiattaforme = 6;
 
 
-GLuint playerVao, platformVao, bulletVao;
-GLuint playerVbo, platformVbo, bulletVbo;
+GLuint playerVao, platformVao, bulletVao, enemyVao;
+GLuint playerVbo, platformVbo, bulletVbo, enemyVbo;
 
 #include <vector>
 
@@ -58,9 +58,169 @@ struct Bullet {
 
 std::vector<Bullet> bullets;
 
-void jump() {
-    PLAYER_SPEED_Y += 0.04f;
+struct Enemy {
+    float x;
+    float y;
+    float width;
+    float height;
+    float speedX = 0;
+    float speedY = 0;
+    float acceleration;
+    bool alive = true;
+};
+
+std::vector<Enemy> enemies;
+
+float platforCollisionDetector(float objectX, float objectY, float object_width) {
+    float angolo_dx_player = objectX + object_width;
+
+    for (Platform platform : platforms) {
+        if (objectY + platform.height > platform.y) platform.surpassed = true;
+        else platform.surpassed = false;
+        if (((objectX >= platform.x && objectX <= platform.x + platform.width) ||
+            (angolo_dx_player >= platform.x && angolo_dx_player <= platform.x + platform.width)) &&
+            objectY >= platform.y && objectY <= platform.y + platform.height && platform.surpassed) {
+            return platform.y + platform.height;
+        }
+    }
+    return -0.9f;
+
 }
+
+void ObjectGravityHandler(float& objectX, float& objectY, float& object_speedY, float object_width) {
+    if (object_speedY > 0) {
+        objectY += object_speedY;
+        if (object_speedY > 0) {
+            object_speedY -= 0.001f;
+        }
+    }
+    if ((object_speedY < 0 && objectY > -0.9f) || platforCollisionDetector(objectX, objectY, object_width) == -0.9f) {
+        objectY += object_speedY;
+        if (object_speedY > -0.06f) {
+            object_speedY -= 0.001f;
+        }
+    }
+    float tmp = platforCollisionDetector(objectX, objectY, object_width);
+    if (objectY < tmp) {
+        object_speedY = 0;
+        objectY = tmp;
+    }
+}
+
+void ObjectInertiaHandler(float& objectX, float& object_speedX) {
+    if (object_speedX > 0) {
+        objectX += object_speedX;
+        if (object_speedX > 0) {
+            object_speedX -= 0.003f;
+        }
+    }
+    if (object_speedX < 0) {
+        objectX += object_speedX;
+        if (object_speedX < 0) {
+            object_speedX += 0.003f;
+        }
+    }
+    if ((object_speedX < 0.005f && object_speedX > -0.005f) || (objectX > 0.09f || objectX < -0.09f)) {
+        object_speedX = 0;
+    }
+}
+
+void jump(float& object_speedY) {
+    if (object_speedY == 0) {
+        object_speedY += 0.04f;
+    }
+}
+
+void ObjectLeftMover(float& objectX, float& objectY, float& object_speedX, float acceleration) {
+    if (objectX > -0.9f && object_speedX > -0.02f) {
+        object_speedX -= acceleration;
+    }
+}
+
+void ObjectRightMover(float& objectX, float& objectY, float& object_speedX, float acceleration) {
+    if (objectX < 0.8f && object_speedX < 0.02f) {
+        object_speedX += acceleration;
+    }
+}
+
+void createEnemies() {
+    // Creazione di un nemico
+    Enemy enemy;
+    enemy.x = PLAYER_POSITION_X;// Posizione X del nemico
+    enemy.y = PLAYER_POSITION_Y;// Posizione Y del nemico
+    enemy.width = PLAYER_WIDTH;// Larghezza del nemico
+    enemy.height = PLAYER_HEIGHT;// Altezza del nemico
+    enemy.acceleration = PLAYER_ACCELERATION;
+    enemy.speedX = 0.01f;
+    // Altri attributi inizializzati
+    enemies.push_back(enemy);
+}
+
+void moveEnemies() {
+    for (Enemy& enemy : enemies) {
+        if (enemy.alive) {
+            srand(time(0));
+            int randomNumber = rand() % 60 + 1;
+            if (randomNumber == 1) {
+                ObjectRightMover(enemy.x, enemy.y, enemy.speedX, enemy.acceleration);
+            }
+            if (randomNumber == 2) {
+                ObjectLeftMover(enemy.x, enemy.y, enemy.speedX, enemy.acceleration);
+            }
+            if (randomNumber == 3) {
+                jump(enemy.speedY);
+            }
+            // Aggiorna la posizione dei nemici in base alla logica di movimento
+            // Ad esempio, puoi incrementare o decrementare le coordinate X e Y
+            //Spostamento orizzontale
+            ObjectInertiaHandler(enemy.x, enemy.speedX);
+
+            //Spostamento verticale e gravità
+            ObjectGravityHandler(enemy.x, enemy.y, enemy.speedY, enemy.width);
+        }
+
+    }
+}
+
+void drawEnemies() {
+    // Colore dei nemici
+    glColor3f(0.0f, 0.0f, 1.0f); // Blu
+
+
+    for (const auto& enemy : enemies) {
+        // Calcola i vertici del nemico
+        GLfloat enemyVertices[] = {
+            enemy.x, enemy.y,
+            enemy.x + enemy.width, enemy.y,
+            enemy.x + enemy.width, enemy.y + enemy.height,
+            enemy.x, enemy.y + enemy.height
+        };
+
+        // Genera e bind del Vertex Array Object (VAO) per il proiettile
+        GLuint enemyVao;
+        glGenVertexArrays(1, &enemyVao);
+        glBindVertexArray(enemyVao);
+
+        // Genera e bind del Vertex Buffer Object (VBO) per i vertici del proiettile
+        GLuint enemyVbo;
+        glGenBuffers(1, &enemyVbo);
+        glBindBuffer(GL_ARRAY_BUFFER, enemyVbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(enemyVertices), enemyVertices, GL_STATIC_DRAW);
+
+        // Imposta l'attributo di posizione del proiettile
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+        // Disegna il proiettile
+        glDrawArrays(GL_QUADS, 0, 4);
+
+        // Pulizia delle risorse
+        glDisableVertexAttribArray(0);
+        glDeleteBuffers(1, &enemyVbo);
+        glDeleteVertexArrays(1, &enemyVao);
+    }
+}
+
 
 bool isOverlapping(Platform platform1, Platform platform2) {
     if (platform1.x < platform2.x + platform2.width &&
@@ -139,58 +299,6 @@ void displayPlatforms() {
 }
 
 
-float platforCollisionDetector(float objectX, float objectY, float object_width) {
-    float angolo_dx_player = objectX + object_width;
-
-    for (Platform platform : platforms) {
-        if (objectY + platform.height > platform.y) platform.surpassed = true;
-        else platform.surpassed = false;
-        if (((objectX >= platform.x && objectX <= platform.x + platform.width) ||
-            (angolo_dx_player >= platform.x && angolo_dx_player <= platform.x + platform.width)) &&
-            objectY >= platform.y && objectY <= platform.y + platform.height && platform.surpassed) {
-            return platform.y + platform.height;
-        }
-    }
-    return -0.9f;
-
-}
-
-void PlayerGravityHandler() {
-    if (PLAYER_SPEED_Y > 0) {
-        PLAYER_POSITION_Y += PLAYER_SPEED_Y;
-        if (PLAYER_SPEED_Y > 0) {
-            PLAYER_SPEED_Y -= 0.001f;
-        }
-    }
-    if ((PLAYER_SPEED_Y < 0 && PLAYER_POSITION_Y > -0.9f) || platforCollisionDetector(PLAYER_POSITION_X, PLAYER_POSITION_Y, PLAYER_WIDTH) == -0.9f) {
-        PLAYER_POSITION_Y += PLAYER_SPEED_Y;
-        if (PLAYER_SPEED_Y > -0.06f) {
-            PLAYER_SPEED_Y -= 0.001f;
-        }
-    }
-    if (PLAYER_POSITION_Y < platforCollisionDetector(PLAYER_POSITION_X, PLAYER_POSITION_Y, PLAYER_WIDTH)) {
-        PLAYER_SPEED_Y = 0;
-    }
-}
-
-void PlayerInertiaHandler() {
-    if (PLAYER_SPEED_X > 0) {
-        PLAYER_POSITION_X += PLAYER_SPEED_X;
-        if (PLAYER_SPEED_X > 0) {
-            PLAYER_SPEED_X -= 0.003f;
-        }
-    }
-    if (PLAYER_SPEED_X < 0) {
-        PLAYER_POSITION_X += PLAYER_SPEED_X;
-        if (PLAYER_SPEED_X < 0) {
-            PLAYER_SPEED_X += 0.003f;
-        }
-    }
-    if ((PLAYER_SPEED_X < 0.005f && PLAYER_SPEED_X > -0.005f) || (PLAYER_POSITION_X > 0.09f || PLAYER_POSITION_X < -0.09f)) {
-        PLAYER_SPEED_X = 0;
-    }
-}
-
 void shootBullet() {
     // Crea un nuovo proiettile
     Bullet newBullet;
@@ -236,13 +344,15 @@ void update(int value) {
 
     // Aggiorna la posizione del giocatore
         //Spostamento orizzontale
-        PlayerInertiaHandler();
+        ObjectInertiaHandler(PLAYER_POSITION_X, PLAYER_SPEED_X);
 
         //Spostamento verticale e gravità
-        PlayerGravityHandler();
+        ObjectGravityHandler(PLAYER_POSITION_X, PLAYER_POSITION_Y, PLAYER_SPEED_Y, PLAYER_WIDTH);
 
     // Aggiorna la posizione del proiettile
     bulletMovementHandler();
+
+    moveEnemies();
 
     // Ridisegna il quadrato
     glBindVertexArray(playerVao);
@@ -367,21 +477,16 @@ void initializeVaoVbo() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+
 void updatePlayerInteractions() {
     if (aKeyIsDown) {
-        if (PLAYER_POSITION_X > -0.9f && PLAYER_SPEED_X > -0.02f) {
-            PLAYER_SPEED_X -= PLAYER_ACCELERATION;
-        }
+        ObjectLeftMover(PLAYER_POSITION_X, PLAYER_POSITION_Y, PLAYER_SPEED_X, PLAYER_ACCELERATION);
     }
     if (dKeyIsDown) {
-        if (PLAYER_POSITION_X < 0.8f && PLAYER_SPEED_X < 0.02f) {
-            PLAYER_SPEED_X += PLAYER_ACCELERATION;
-        }
+        ObjectRightMover(PLAYER_POSITION_X, PLAYER_POSITION_Y, PLAYER_SPEED_X, PLAYER_ACCELERATION);
     }
     if (spaceBarIsDown) {
-        if (PLAYER_SPEED_Y == 0) {
-            jump();
-        }
+        jump(PLAYER_SPEED_Y);
     }
 }
 
@@ -416,6 +521,8 @@ void display() {
     // Disegna i proiettili sparati dal giocatore
     drawBullets();
 
+    drawEnemies();
+
     updatePlayerInteractions();
     glutSwapBuffers();
 }
@@ -438,6 +545,7 @@ void keyboard(unsigned char key, int x, int y) {
         break;
     case 'f':
     case 'F':
+        createEnemies();
         shootBullet();
         break;
     }
