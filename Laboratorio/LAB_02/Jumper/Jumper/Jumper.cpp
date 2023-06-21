@@ -5,8 +5,13 @@
 #include <random>
 #include <ctime>
 #include <cmath>
+#include <vector>
+#include <chrono>
+#include <thread>
 
 #define SPACE_BAR 32
+
+bool pausa = false;
 
 float PLAYER_SPEED_X = 0;
 
@@ -18,6 +23,11 @@ bool aKeyIsDown = false;
 bool dKeyIsDown = false;
 bool spaceBarIsDown = false;
 int bulletDirection = 1;
+
+float timeSinceLastEnemy = 0.0f;
+float enemySpawnTime = 5.0f; // Tempo iniziale per creare un nuovo nemico
+float timeSinceLastFrame = 0.0f;
+float deltaTime;
 
 int punteggio = 0;
 bool game_over = false;
@@ -38,7 +48,6 @@ const int numeroPiattaforme = 6;
 GLuint playerVao, platformVao, bulletVao, enemyVao;
 GLuint playerVbo, platformVbo, bulletVbo, enemyVbo;
 
-#include <vector>
 
 struct Platform {
     float x;
@@ -75,6 +84,8 @@ struct Enemy {
 };
 
 std::vector<Enemy> enemies;
+
+
 
 float platforCollisionDetector(float objectX, float objectY, float object_width) {
     float angolo_dx_player = objectX + object_width;
@@ -147,19 +158,47 @@ void ObjectRightMover(float& objectX, float& objectY, float& object_speedX, floa
     }
 }
 
+int randomSign(){
+    int randomNumber = rand();
+    if (randomNumber % 2 == 0)
+        return 1;
+    else
+        return -1;
+}
+
+
 void createEnemies() {
+    srand(time(NULL));
     // Creazione di un nemico
     Enemy enemy;
-    enemy.x = PLAYER_POSITION_X;// Posizione X del nemico
-    enemy.y = PLAYER_POSITION_Y;// Posizione Y del nemico
+    enemy.x = randomSign();// Posizione X del nemico
+    enemy.y = -0.9f;// Posizione Y del nemico
     enemy.width = PLAYER_WIDTH;// Larghezza del nemico
     enemy.height = PLAYER_HEIGHT;// Altezza del nemico
-    enemy.acceleration = PLAYER_ACCELERATION/2;
+    enemy.acceleration = PLAYER_ACCELERATION / 3;
     enemy.speedX = 0.005f;
-    enemy.jumpForce = PLAYER_JUMP_FORCE*0.8;
+    enemy.jumpForce = PLAYER_JUMP_FORCE * 0.8;
     // Altri attributi inizializzati
     enemies.push_back(enemy);
 }
+
+void increasedSpawnrate() {
+    enemySpawnTime *= 0.98f; // Riduci il tempo per creare un nuovo nemico del 10%
+}
+
+void enemiesSpawner() {
+    float currentTime = GetTickCount() / 1000.0f;
+    deltaTime = currentTime - timeSinceLastFrame;
+    timeSinceLastFrame = currentTime;
+    timeSinceLastEnemy += deltaTime;
+    if (timeSinceLastEnemy >= enemySpawnTime) {
+        createEnemies();
+        increasedSpawnrate();
+        timeSinceLastEnemy = 0.0f;
+    }
+    // Aggiorna il resto del gioco
+}
+
 
 void moveEnemies() {
     for (Enemy& enemy : enemies) {
@@ -240,7 +279,7 @@ bool isOverlapping(Platform platform1, Platform platform2) {
 
 void initializePlatforms() {
     // Inizializza le piattaforme in posizioni casuali
-    srand(time(0));
+    srand(time(NULL));
 
     // Crea una piattafroma base
     Platform basePlatform;
@@ -383,36 +422,31 @@ void checkPlayerEnemyCollison() {
     }
 }
 
+
 void update(int value) {
-    if (!game_over) {
-
-
-    }
-
-    if (punteggio >= 1000) {
-        game_over = true;
-    }
-
-    // Aggiorna la posizione del giocatore
-        //Spostamento orizzontale
+    if (!game_over && !pausa) {
+        // Aggiorna la posizione del giocatore
+            //Spostamento orizzontale
         ObjectInertiaHandler(PLAYER_POSITION_X, PLAYER_SPEED_X);
 
         //Spostamento verticale e gravità
         ObjectGravityHandler(PLAYER_POSITION_X, PLAYER_POSITION_Y, PLAYER_SPEED_Y, PLAYER_WIDTH);
 
-    // Aggiorna la posizione del proiettile
-    bulletMovementHandler();
+        // Aggiorna la posizione del proiettile
+        bulletMovementHandler();
 
-    checkBulletCollision();
+        checkBulletCollision();
 
-    checkPlayerEnemyCollison();
+        checkPlayerEnemyCollison();
 
-    // Aggiorna la posizione dei nemici
-    //moveEnemies();
+        // Aggiorna la posizione dei nemici
+        moveEnemies();
 
-    // Richiede il ridisegno della scena
-    glutPostRedisplay();
-    glutTimerFunc(16, update, 0);
+        enemiesSpawner();
+    }
+        // Richiede il ridisegno della scena
+        glutPostRedisplay();
+        glutTimerFunc(16, update, 0);
 }
 
 void drawPlayer() {
@@ -545,16 +579,57 @@ void drawPlatforms() {
 
 
 void updatePlayerInteractions() {
-    if (aKeyIsDown) {
-        ObjectLeftMover(PLAYER_POSITION_X, PLAYER_POSITION_Y, PLAYER_SPEED_X, PLAYER_ACCELERATION);
-    }
-    if (dKeyIsDown) {
-        ObjectRightMover(PLAYER_POSITION_X, PLAYER_POSITION_Y, PLAYER_SPEED_X, PLAYER_ACCELERATION);
-    }
-    if (spaceBarIsDown) {
-        jump(PLAYER_SPEED_Y, PLAYER_JUMP_FORCE);
+    if (!game_over) {
+        if (aKeyIsDown) {
+            ObjectLeftMover(PLAYER_POSITION_X, PLAYER_POSITION_Y, PLAYER_SPEED_X, PLAYER_ACCELERATION);
+        }
+        if (dKeyIsDown) {
+            ObjectRightMover(PLAYER_POSITION_X, PLAYER_POSITION_Y, PLAYER_SPEED_X, PLAYER_ACCELERATION);
+        }
+        if (spaceBarIsDown) {
+            jump(PLAYER_SPEED_Y, PLAYER_JUMP_FORCE);
+        }
     }
 }
+
+
+void MostraPunteggio(int x, int y, float r, float g, float b, void* font, int punteggio){
+    char buffer[20];
+    sprintf_s(buffer, "Punteggio: %d", punteggio);
+    glColor3f(r, g, b);
+    glWindowPos2f(x, y);
+    int len, i;
+    len = (int)strlen(buffer);
+    for (i = 0; i < len; i++) {
+        glutBitmapCharacter(font, buffer[i]);
+    }
+}
+
+void GameOver() {
+    char buffer[10];
+    sprintf_s(buffer, "Game Over");
+    glColor3f(1, 0, 0);
+    glWindowPos2f(640, 360);
+    int len, i;
+    len = (int)strlen(buffer);
+    for (i = 0; i < len; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_9_BY_15, buffer[i]);
+    }
+}
+
+void Pausa() {
+    char buffer[10];
+    sprintf_s(buffer, "PAUSA");
+    glColor3f(1, 1, 1);
+    glWindowPos2f(640, 360);
+    int len, i;
+    len = (int)strlen(buffer);
+    for (i = 0; i < len; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_9_BY_15, buffer[i]);
+    }
+}
+
+
 
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
@@ -578,6 +653,16 @@ void display() {
     drawBullets();
 
     drawEnemies();
+
+    MostraPunteggio(10, 700, 1, 1, 1, GLUT_BITMAP_9_BY_15, punteggio);
+
+    if (game_over) {
+        GameOver();
+    }
+
+    if (pausa) {
+        Pausa();
+    }
 
     updatePlayerInteractions();
     glutSwapBuffers();
@@ -603,9 +688,14 @@ void keyboard(unsigned char key, int x, int y) {
     case 'F':
         shootBullet();
         break;
-    case 'l':
-    case 'L':
-        createEnemies();
+    case 'p':
+    case 'P':
+        if (!pausa) {
+            pausa = true;
+        }
+        else if (pausa) {
+            pausa = false;
+        }
         break;
     }
 }
@@ -650,7 +740,6 @@ int main(int argc, char** argv) {
     glutKeyboardFunc(keyboard);
     glutKeyboardUpFunc(keyboardUp);
     glutTimerFunc(0, update, 0);
-
 
     glutMainLoop();
     return 0;
