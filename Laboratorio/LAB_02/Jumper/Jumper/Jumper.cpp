@@ -17,7 +17,7 @@ float PLAYER_ACCELERATION = 0.03f;
 bool aKeyIsDown = false;
 bool dKeyIsDown = false;
 bool spaceBarIsDown = false;
-int tmp_direction = 1;
+int bulletDirection = 1;
 
 int punteggio = 0;
 bool game_over = false;
@@ -25,9 +25,11 @@ bool game_over = false;
 
 float PLAYER_POSITION_X = 0.0f;
 float PLAYER_POSITION_Y = -0.9f;
+const float PLAYER_WIDTH = 0.05f;
+const float PLAYER_HEIGHT = 0.1f;
+const float PLAYER_JUMP_FORCE = 0.04f;
 
-const float PLAYER_WIDTH = 0.1f;
-const float PLAYER_HEIGHT = 0.2f;
+
 const float larghezzaPiattaforma = 0.5f;
 const float altezzaPiattaforma = 0.05f;
 const int numeroPiattaforme = 6;
@@ -65,7 +67,8 @@ struct Enemy {
     float height;
     float speedX = 0;
     float speedY = 0;
-    float acceleration;
+    float acceleration = 0;
+    float jumpForce;
     bool alive = true;
 };
 
@@ -125,20 +128,20 @@ void ObjectInertiaHandler(float& objectX, float& object_speedX) {
     }
 }
 
-void jump(float& object_speedY) {
+void jump(float& object_speedY, float jumpForce) {
     if (object_speedY == 0) {
-        object_speedY += 0.04f;
+        object_speedY += jumpForce;
     }
 }
 
 void ObjectLeftMover(float& objectX, float& objectY, float& object_speedX, float acceleration) {
-    if (objectX > -0.9f && object_speedX > -0.02f) {
+    if (objectX > -0.98f && object_speedX > -0.02f) {
         object_speedX -= acceleration;
     }
 }
 
 void ObjectRightMover(float& objectX, float& objectY, float& object_speedX, float acceleration) {
-    if (objectX < 0.8f && object_speedX < 0.02f) {
+    if (objectX < 0.94f && object_speedX < 0.02f) {
         object_speedX += acceleration;
     }
 }
@@ -150,8 +153,9 @@ void createEnemies() {
     enemy.y = PLAYER_POSITION_Y;// Posizione Y del nemico
     enemy.width = PLAYER_WIDTH;// Larghezza del nemico
     enemy.height = PLAYER_HEIGHT;// Altezza del nemico
-    enemy.acceleration = PLAYER_ACCELERATION;
-    enemy.speedX = 0.01f;
+    enemy.acceleration = PLAYER_ACCELERATION/2;
+    enemy.speedX = 0.005f;
+    enemy.jumpForce = PLAYER_JUMP_FORCE*0.8;
     // Altri attributi inizializzati
     enemies.push_back(enemy);
 }
@@ -159,16 +163,15 @@ void createEnemies() {
 void moveEnemies() {
     for (Enemy& enemy : enemies) {
         if (enemy.alive) {
-            srand(time(0));
-            int randomNumber = rand() % 60 + 1;
-            if (randomNumber == 1) {
+ 
+            if (PLAYER_POSITION_X > enemy.x) {
                 ObjectRightMover(enemy.x, enemy.y, enemy.speedX, enemy.acceleration);
             }
-            if (randomNumber == 2) {
+            if (PLAYER_POSITION_X < enemy.x) {
                 ObjectLeftMover(enemy.x, enemy.y, enemy.speedX, enemy.acceleration);
             }
-            if (randomNumber == 3) {
-                jump(enemy.speedY);
+            if (PLAYER_POSITION_Y > enemy.y) {
+                jump(enemy.speedY, enemy.jumpForce);
             }
             // Aggiorna la posizione dei nemici in base alla logica di movimento
             // Ad esempio, puoi incrementare o decrementare le coordinate X e Y
@@ -184,7 +187,7 @@ void moveEnemies() {
 
 void drawEnemies() {
     // Colore dei nemici
-    glColor3f(0.0f, 0.0f, 1.0f); // Blu
+    glColor3f(0.0f, 1.0f, 0.0f); // Verde
 
 
     for (const auto& enemy : enemies) {
@@ -196,22 +199,22 @@ void drawEnemies() {
             enemy.x, enemy.y + enemy.height
         };
 
-        // Genera e bind del Vertex Array Object (VAO) per il proiettile
+        // Genera e bind del Vertex Array Object (VAO) per il nemico
         GLuint enemyVao;
         glGenVertexArrays(1, &enemyVao);
         glBindVertexArray(enemyVao);
 
-        // Genera e bind del Vertex Buffer Object (VBO) per i vertici del proiettile
+        // Genera e bind del Vertex Buffer Object (VBO) per i vertici del nemico
         GLuint enemyVbo;
         glGenBuffers(1, &enemyVbo);
         glBindBuffer(GL_ARRAY_BUFFER, enemyVbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(enemyVertices), enemyVertices, GL_STATIC_DRAW);
 
-        // Imposta l'attributo di posizione del proiettile
+        // Imposta l'attributo di posizione del nemico
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 
-        // Disegna il proiettile
+        // Disegna il nemico
         glDrawArrays(GL_QUADS, 0, 4);
 
         // Pulizia delle risorse
@@ -233,10 +236,10 @@ bool isOverlapping(Platform platform1, Platform platform2) {
 }
 
 void initializePlatforms() {
-    // Initialize platforms with random positions
+    // Inizializza le piattaforme in posizioni casuali
     srand(time(0));
 
-    // Create a base platform
+    // Crea una piattafroma base
     Platform basePlatform;
     basePlatform.x = -1.0f;  // Posizione x iniziale
     basePlatform.y = -0.95f;  // Posizione y
@@ -304,7 +307,7 @@ void shootBullet() {
     Bullet newBullet;
 
     // Imposta la posizione e la velocità del proiettile iniziale
-    if (tmp_direction == 1) {
+    if (bulletDirection == 1) {
         newBullet.x = PLAYER_POSITION_X + PLAYER_WIDTH * 0.8;
     }
     else newBullet.x = PLAYER_POSITION_X - (PLAYER_WIDTH * (2/3));
@@ -313,7 +316,7 @@ void shootBullet() {
     newBullet.isActive = true;
 
     // Imposta la direzione dello sparo in base all'ultimo input dell'utente
-    newBullet.direction = tmp_direction; // 1 se è stato premuto "d", -1 se è stato premuto "a"
+    newBullet.direction = bulletDirection; // 1 se è stato premuto "d", -1 se è stato premuto "a"
 
     // Aggiungi il nuovo proiettile al vettore dei proiettili
     bullets.push_back(newBullet);
@@ -352,9 +355,20 @@ void update(int value) {
     // Aggiorna la posizione del proiettile
     bulletMovementHandler();
 
+    // Aggiorna la posizione dei nemici
     moveEnemies();
 
-    // Ridisegna il quadrato
+    // Richiede il ridisegno della scena
+    glutPostRedisplay();
+    glutTimerFunc(16, update, 0);
+}
+
+void drawPlayer() {
+    // Colore del giocatore
+    glColor3f(1.0f, 0.0f, 0.0f);
+
+
+    // Ridisegna il giocatore
     glBindVertexArray(playerVao);
     glBindBuffer(GL_ARRAY_BUFFER, playerVbo);
 
@@ -365,12 +379,31 @@ void update(int value) {
         PLAYER_POSITION_X, PLAYER_POSITION_Y + PLAYER_HEIGHT
     };
 
+    // Genera e bind del Vertex Array Object (VAO) per il giocatore
+    GLuint playerVao;
+    glGenVertexArrays(1, &playerVao);
+    glBindVertexArray(playerVao);
+
+    // Genera e bind del Vertex Buffer Object (VBO) per i vertici del giocatore
+    GLuint playerVbo;
+    glGenBuffers(1, &playerVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, playerVbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(PLAYER_VERTICES), PLAYER_VERTICES, GL_STATIC_DRAW);
 
-    // Richiede il ridisegno della scena
-    glutPostRedisplay();
-    glutTimerFunc(16, update, 0);
+    // Imposta l'attributo di posizione del giocatore
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+    // Disegna il giocatore
+    glDrawArrays(GL_QUADS, 0, 4);
+
+    // Pulizia delle risorse
+    glDisableVertexAttribArray(0);
+    glDeleteBuffers(1, &playerVbo);
+    glDeleteVertexArrays(1, &playerVao);
+  
 }
+
 
 void drawBullets() {
     // Colore del proiettile
@@ -418,64 +451,48 @@ void drawBullets() {
 
 
 
-void initializeVaoVbo() {
-    // Inizializza il VAO e il VBO per il quadrato
-    glGenVertexArrays(1, &playerVao);
-    glBindVertexArray(playerVao);
-
-    glGenBuffers(1, &playerVbo);
-    glBindBuffer(GL_ARRAY_BUFFER, playerVbo);
-
-    GLfloat PLAYER_VERTICES[] = {
-        PLAYER_POSITION_X, PLAYER_POSITION_Y,
-        PLAYER_POSITION_X + PLAYER_WIDTH, PLAYER_POSITION_Y,
-        PLAYER_POSITION_X + PLAYER_WIDTH, PLAYER_POSITION_Y + PLAYER_HEIGHT,
-        PLAYER_POSITION_X, PLAYER_POSITION_Y + PLAYER_HEIGHT
-    };
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(PLAYER_VERTICES), PLAYER_VERTICES, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-    // Inizializza il VAO e il VBO per le piattaforme
-    glGenVertexArrays(1, &platformVao);
-    glBindVertexArray(platformVao);
-
-    glGenBuffers(1, &platformVbo);
-    glBindBuffer(GL_ARRAY_BUFFER, platformVbo);
-
-    // Calcola la dimensione totale del buffer dei dati
-    GLsizeiptr platformBufferSize = sizeof(GLfloat) * 4 * platforms.size();
-
-    // Alloca memoria per il buffer dei dati e copia i vertici delle piattaforme
-    GLfloat* platformBufferData = new GLfloat[platformBufferSize];
-    int platformBufferOffset = 0;
+void drawPlatforms() {
+    // Colore delle piattaforme
+    glColor3f(1.0f, 1.0f, 0.0f);
     for (const Platform& platform : platforms) {
-        platformBufferData[platformBufferOffset++] = platform.x;
-        platformBufferData[platformBufferOffset++] = platform.y;
-        platformBufferData[platformBufferOffset++] = platform.x + platform.width;
-        platformBufferData[platformBufferOffset++] = platform.y;
-        platformBufferData[platformBufferOffset++] = platform.x + platform.width;
-        platformBufferData[platformBufferOffset++] = platform.y + platform.height;
-        platformBufferData[platformBufferOffset++] = platform.x;
-        platformBufferData[platformBufferOffset++] = platform.y + platform.height;
+        GLfloat platformVertices[] = {
+            platform.x, platform.y,
+            platform.x + platform.width, platform.y,
+            platform.x + platform.width, platform.y + platform.height,
+            platform.x, platform.y + platform.height
+        };
+
+        glBindBuffer(GL_ARRAY_BUFFER, platformVbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(platformVertices), platformVertices, GL_STATIC_DRAW);
+
+        glDrawArrays(GL_QUADS, 0, 4);
+
+
+        // Genera e bind del Vertex Array Object (VAO) per la piattaforma
+        GLuint platformVao;
+        glGenVertexArrays(1, &platformVao);
+        glBindVertexArray(platformVao);
+
+        // Genera e bind del Vertex Buffer Object (VBO) per i vertici della piattaforma
+        GLuint platformVbo;
+        glGenBuffers(1, &platformVbo);
+        glBindBuffer(GL_ARRAY_BUFFER, platformVbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(platformVertices), platformVertices, GL_STATIC_DRAW);
+
+        // Imposta l'attributo di posizione della piattaforma
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+        // Disegna la piattaforma
+        glDrawArrays(GL_QUADS, 0, 4);
+
+        // Pulizia delle risorse
+        glDisableVertexAttribArray(0);
+        glDeleteBuffers(1, &platformVbo);
+        glDeleteVertexArrays(1, &platformVao);
     }
-
-    // Copia i dati nel buffer dei dati del VBO
-    glBufferData(GL_ARRAY_BUFFER, platformBufferSize, platformBufferData, GL_STATIC_DRAW);
-
-    // Libera la memoria allocata per il buffer dei dati
-    delete[] platformBufferData;
-
-    // Abilita l'array degli attributi dei vertici
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-    // Scollega il VAO e il VBO
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
+
 
 
 void updatePlayerInteractions() {
@@ -486,7 +503,7 @@ void updatePlayerInteractions() {
         ObjectRightMover(PLAYER_POSITION_X, PLAYER_POSITION_Y, PLAYER_SPEED_X, PLAYER_ACCELERATION);
     }
     if (spaceBarIsDown) {
-        jump(PLAYER_SPEED_Y);
+        jump(PLAYER_SPEED_Y, PLAYER_JUMP_FORCE);
     }
 }
 
@@ -504,19 +521,9 @@ void display() {
     glColor3f(1.0f, 1.0f, 0.0f); // Imposta il colore a giallo
 
     // Itera sulle piattaforme e disegna ciascuna di esse
-    for (const Platform& platform : platforms) {
-        GLfloat platformVertices[] = {
-            platform.x, platform.y,
-            platform.x + platform.width, platform.y,
-            platform.x + platform.width, platform.y + platform.height,
-            platform.x, platform.y + platform.height
-        };
-
-        glBindBuffer(GL_ARRAY_BUFFER, platformVbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(platformVertices), platformVertices, GL_STATIC_DRAW);
-
-        glDrawArrays(GL_QUADS, 0, 4);
-    }
+    drawPlatforms();
+ 
+    drawPlayer();
 
     // Disegna i proiettili sparati dal giocatore
     drawBullets();
@@ -532,12 +539,12 @@ void keyboard(unsigned char key, int x, int y) {
     switch (key) {
     case 'a':
     case 'A':
-        tmp_direction = -1;
+        bulletDirection = -1;
         aKeyIsDown = true;
         break;
     case 'd':
     case 'D':
-        tmp_direction = 1;
+        bulletDirection = 1;
         dKeyIsDown = true;
         break;
     case SPACE_BAR:
@@ -545,8 +552,11 @@ void keyboard(unsigned char key, int x, int y) {
         break;
     case 'f':
     case 'F':
-        createEnemies();
         shootBullet();
+        break;
+    case 'l':
+    case 'L':
+        createEnemies();
         break;
     }
 }
@@ -580,11 +590,10 @@ void reshape(int width, int height) {
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-    glutInitWindowSize(600, 480);
+    glutInitWindowSize(1280, 720);
     glutCreateWindow("Jumper");
 
     glewInit();
-    initializeVaoVbo();
     initializePlatforms();
 
     glutDisplayFunc(display);
