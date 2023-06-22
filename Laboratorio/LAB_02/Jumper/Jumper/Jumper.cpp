@@ -1,3 +1,4 @@
+#include "ShaderMaker.h"
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include <iostream>
@@ -8,6 +9,10 @@
 #include <vector>
 #include <chrono>
 #include <thread>
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+static unsigned int programId;
 
 #define SPACE_BAR 32
 
@@ -35,7 +40,7 @@ bool game_over = false;
 
 float PLAYER_POSITION_X = 0.0f;
 float PLAYER_POSITION_Y = -0.9f;
-const float PLAYER_WIDTH = 0.05f;
+const float PLAYER_WIDTH = 0.15f;
 const float PLAYER_HEIGHT = 0.2f;
 const float PLAYER_JUMP_FORCE = 0.04f;
 
@@ -43,6 +48,8 @@ const float PLAYER_JUMP_FORCE = 0.04f;
 const float larghezzaPiattaforma = 0.5f;
 const float altezzaPiattaforma = 0.05f;
 const int numeroPiattaforme = 6;
+
+unsigned int PlayerTexture;
 
 
 GLuint playerVao, platformVao, bulletVao, enemyVao;
@@ -86,6 +93,16 @@ struct Enemy {
 std::vector<Enemy> enemies;
 
 
+void initShader(void)
+{
+    GLenum ErrorCheckValue = glGetError();
+
+    char* vertexShader = (char*)"vertexShader_C_M.glsl";
+    char* fragmentShader = (char*)"fragmentShader_C_M.glsl";
+
+    programId = ShaderMaker::createProgram(vertexShader, fragmentShader);
+
+}
 
 float platforCollisionDetector(float objectX, float objectY, float object_width) {
     float angolo_dx_player = objectX + object_width;
@@ -422,12 +439,26 @@ void checkPlayerEnemyCollison() {
     }
 }
 
+void updatePlayerInteractions() {
+    if (!game_over) {
+        if (aKeyIsDown) {
+            ObjectLeftMover(PLAYER_POSITION_X, PLAYER_POSITION_Y, PLAYER_SPEED_X, PLAYER_ACCELERATION);
+        }
+        if (dKeyIsDown) {
+            ObjectRightMover(PLAYER_POSITION_X, PLAYER_POSITION_Y, PLAYER_SPEED_X, PLAYER_ACCELERATION);
+        }
+        if (spaceBarIsDown) {
+            jump(PLAYER_SPEED_Y, PLAYER_JUMP_FORCE);
+        }
+    }
+}
 
 void update(int value) {
     if (!game_over && !pausa) {
         // Aggiorna la posizione del giocatore
             //Spostamento orizzontale
         ObjectInertiaHandler(PLAYER_POSITION_X, PLAYER_SPEED_X);
+        updatePlayerInteractions();
 
         //Spostamento verticale e gravità
         ObjectGravityHandler(PLAYER_POSITION_X, PLAYER_POSITION_Y, PLAYER_SPEED_Y, PLAYER_WIDTH);
@@ -449,20 +480,58 @@ void update(int value) {
         glutTimerFunc(16, update, 0);
 }
 
+void playerTexture() {
+
+    stbi_set_flip_vertically_on_load(true);
+
+    // Abilita il blending
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Carica l'immagine della texture
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load("./Textures/Player.png", &width, &height, &nrChannels, 0);
+
+    // Genera un ID per la texture e la lega
+    glGenTextures(1, &PlayerTexture);
+    glBindTexture(GL_TEXTURE_2D, PlayerTexture);
+
+    // Imposta i parametri di wrapping e filtering della texture
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Carica i dati dell'immagine nella texture
+    if (data)
+    {
+        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
+
+}
+
+
 void drawPlayer() {
     // Colore del giocatore
     glColor3f(1.0f, 0.0f, 0.0f);
-
 
     // Ridisegna il giocatore
     glBindVertexArray(playerVao);
     glBindBuffer(GL_ARRAY_BUFFER, playerVbo);
 
     GLfloat PLAYER_VERTICES[] = {
-        PLAYER_POSITION_X, PLAYER_POSITION_Y,
-        PLAYER_POSITION_X + PLAYER_WIDTH, PLAYER_POSITION_Y,
-        PLAYER_POSITION_X + PLAYER_WIDTH, PLAYER_POSITION_Y + PLAYER_HEIGHT,
-        PLAYER_POSITION_X, PLAYER_POSITION_Y + PLAYER_HEIGHT
+        // Posizioni         // Coordinate della texture
+        PLAYER_POSITION_X, PLAYER_POSITION_Y, 0.0f, 0.0f,
+        PLAYER_POSITION_X + PLAYER_WIDTH, PLAYER_POSITION_Y, 1.0f, 0.0f,
+        PLAYER_POSITION_X + PLAYER_WIDTH, PLAYER_POSITION_Y + PLAYER_HEIGHT, 1.0f, 1.0f,
+        PLAYER_POSITION_X, PLAYER_POSITION_Y + PLAYER_HEIGHT, 0.0f, 1.0f
     };
 
     // Genera e bind del Vertex Array Object (VAO) per il giocatore
@@ -478,17 +547,25 @@ void drawPlayer() {
 
     // Imposta l'attributo di posizione del giocatore
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+
+    // Imposta l'attributo delle coordinate della texture del giocatore
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+    // Attiva la texture
+    glBindTexture(GL_TEXTURE_2D, PlayerTexture);
 
     // Disegna il giocatore
     glDrawArrays(GL_QUADS, 0, 4);
 
     // Pulizia delle risorse
     glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
     glDeleteBuffers(1, &playerVbo);
     glDeleteVertexArrays(1, &playerVao);
-  
 }
+
 
 
 void drawBullets() {
@@ -576,23 +653,6 @@ void drawPlatforms() {
     }
 }
 
-
-
-void updatePlayerInteractions() {
-    if (!game_over) {
-        if (aKeyIsDown) {
-            ObjectLeftMover(PLAYER_POSITION_X, PLAYER_POSITION_Y, PLAYER_SPEED_X, PLAYER_ACCELERATION);
-        }
-        if (dKeyIsDown) {
-            ObjectRightMover(PLAYER_POSITION_X, PLAYER_POSITION_Y, PLAYER_SPEED_X, PLAYER_ACCELERATION);
-        }
-        if (spaceBarIsDown) {
-            jump(PLAYER_SPEED_Y, PLAYER_JUMP_FORCE);
-        }
-    }
-}
-
-
 void MostraPunteggio(int x, int y, float r, float g, float b, void* font, int punteggio){
     char buffer[20];
     sprintf_s(buffer, "Punteggio: %d", punteggio);
@@ -635,19 +695,13 @@ void display() {
     glClear(GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
 
-    // Disegna il giocatore
-    glBindVertexArray(playerVao);
-    glColor3f(1.0f, 0.0f, 0.0f); // Imposta il colore a rosso
-    glDrawArrays(GL_QUADS, 0, 4);
-
-    // Disegna le piattaforme
-    glBindVertexArray(platformVao);
-    glColor3f(1.0f, 1.0f, 0.0f); // Imposta il colore a giallo
-
     // Itera sulle piattaforme e disegna ciascuna di esse
     drawPlatforms();
- 
+
+    glUseProgram(programId);
     drawPlayer();
+    glUseProgram(0);
+
 
     // Disegna i proiettili sparati dal giocatore
     drawBullets();
@@ -664,7 +718,9 @@ void display() {
         Pausa();
     }
 
-    updatePlayerInteractions();
+
+
+    
     glutSwapBuffers();
 }
 
@@ -735,12 +791,15 @@ int main(int argc, char** argv) {
     glewInit();
     initializePlatforms();
 
+    playerTexture();
+
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);
     glutKeyboardUpFunc(keyboardUp);
     glutTimerFunc(0, update, 0);
 
+    initShader();
     glutMainLoop();
     return 0;
 }
