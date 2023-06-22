@@ -18,6 +18,8 @@ static unsigned int programId;
 
 bool pausa = true;
 
+bool showHitBox = false;
+
 float PLAYER_SPEED_X = 0;
 
 float PLAYER_SPEED_Y = 0;
@@ -50,10 +52,14 @@ const float altezzaPiattaforma = 0.05f;
 const int numeroPiattaforme = 6;
 
 unsigned int PlayerTexture;
+unsigned int EnemyTexture;
+unsigned int BulletTexture;
+unsigned int PlatformTexture;
+unsigned int BackgroundTexture;
 
 
-GLuint playerVao, platformVao, bulletVao, enemyVao;
-GLuint playerVbo, platformVbo, bulletVbo, enemyVbo;
+GLuint playerVao, platformVao, bulletVao, enemyVao, backgroundVao;
+GLuint playerVbo, platformVbo, bulletVbo, enemyVbo, backgroundVbo;
 
 
 struct Platform {
@@ -87,6 +93,7 @@ struct Enemy {
     float speedY = 0.0f;
     float acceleration = 0.0f;
     float jumpForce;
+    int direction;
     bool alive = true;
 };
 
@@ -102,6 +109,197 @@ void initShader(void)
 
     programId = ShaderMaker::createProgram(vertexShader, fragmentShader);
 
+}
+
+void loadPlayerTexture() {
+
+    stbi_set_flip_vertically_on_load(true);
+
+    // Abilita il blending
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Carica l'immagine della texture
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load("./Textures/Player.png", &width, &height, &nrChannels, 0);
+
+    // Genera un ID per la texture e la lega
+    glGenTextures(1, &PlayerTexture);
+    glBindTexture(GL_TEXTURE_2D, PlayerTexture);
+
+    // Imposta i parametri di wrapping e filtering della texture
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Carica i dati dell'immagine nella texture
+    if (data)
+    {
+        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture Player" << std::endl;
+    }
+    stbi_image_free(data);
+
+}
+
+void loadEnemyTexture() {
+
+    stbi_set_flip_vertically_on_load(true);
+
+    // Abilita il blending
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Carica l'immagine della texture
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load("./Textures/Enemy.png", &width, &height, &nrChannels, 0);
+
+    // Genera un ID per la texture e la lega
+    glGenTextures(1, &EnemyTexture);
+    glBindTexture(GL_TEXTURE_2D, EnemyTexture);
+
+    // Imposta i parametri di wrapping e filtering della texture
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Carica i dati dell'immagine nella texture
+    if (data)
+    {
+        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture Enemy" << std::endl;
+    }
+    stbi_image_free(data);
+
+}
+
+void loadBulletTexture() {
+
+    stbi_set_flip_vertically_on_load(true);
+
+    // Abilita il blending
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Carica l'immagine della texture
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load("./Textures/bullet.png", &width, &height, &nrChannels, 0);
+
+    // Genera un ID per la texture e la lega
+    glGenTextures(1, &BulletTexture);
+    glBindTexture(GL_TEXTURE_2D, BulletTexture);
+
+    // Imposta i parametri di wrapping e filtering della texture
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Carica i dati dell'immagine nella texture
+    if (data)
+    {
+        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture Bullet" << std::endl;
+    }
+    stbi_image_free(data);
+
+}
+
+void loadPlatformTexture() {
+
+    stbi_set_flip_vertically_on_load(true);
+
+    // Abilita il blending
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Carica l'immagine della texture
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load("./Textures/platform.png", &width, &height, &nrChannels, 0);
+
+    // Genera un ID per la texture e la lega
+    glGenTextures(1, &PlatformTexture);
+    glBindTexture(GL_TEXTURE_2D, PlatformTexture);
+
+    // Imposta i parametri di wrapping e filtering della texture
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Carica i dati dell'immagine nella texture
+    if (data)
+    {
+        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture Platform" << std::endl;
+    }
+    stbi_image_free(data);
+}
+
+void loadBackgroundTexture() {
+
+    stbi_set_flip_vertically_on_load(true);
+
+    // Abilita il blending
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Carica l'immagine della texture
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load("./Textures/background.png", &width, &height, &nrChannels, 0);
+
+    // Genera un ID per la texture e la lega
+    glGenTextures(1, &BackgroundTexture);
+    glBindTexture(GL_TEXTURE_2D, BackgroundTexture);
+
+    // Imposta i parametri di wrapping e filtering della texture
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Carica i dati dell'immagine nella texture
+    if (data)
+    {
+        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture Background" << std::endl;
+    }
+    stbi_image_free(data);
+}
+
+void texturesLoader() {
+    loadPlayerTexture();
+    loadEnemyTexture();
+    loadBulletTexture();
+    loadPlatformTexture();
+    loadBackgroundTexture();
 }
 
 float platforCollisionDetector(float objectX, float objectY, float object_width) {
@@ -190,7 +388,7 @@ void createEnemies() {
     Enemy enemy;
     enemy.x = randomSign();// Posizione X del nemico
     enemy.y = -0.9f;// Posizione Y del nemico
-    enemy.width = PLAYER_WIDTH;// Larghezza del nemico
+    enemy.width = PLAYER_WIDTH/2;// Larghezza del nemico
     enemy.height = PLAYER_HEIGHT;// Altezza del nemico
     enemy.acceleration = PLAYER_ACCELERATION / 3;
     enemy.speedX = 0.005f;
@@ -223,9 +421,11 @@ void moveEnemies() {
  
             if (PLAYER_POSITION_X > enemy.x) {
                 ObjectRightMover(enemy.x, enemy.y, enemy.speedX, enemy.acceleration);
+                enemy.direction = 1;
             }
             if (PLAYER_POSITION_X < enemy.x) {
                 ObjectLeftMover(enemy.x, enemy.y, enemy.speedX, enemy.acceleration);
+                enemy.direction = -1;
             }
             if (PLAYER_POSITION_Y > enemy.y) {
                 jump(enemy.speedY, enemy.jumpForce);
@@ -246,16 +446,53 @@ void drawEnemies() {
     // Colore dei nemici
     glColor3f(0.0f, 1.0f, 0.0f); // Verde
 
-
     for (const auto& enemy : enemies) {
         if (enemy.alive) {
             // Calcola i vertici del nemico
-            GLfloat enemyVertices[] = {
-                enemy.x, enemy.y,
-                enemy.x + enemy.width, enemy.y,
-                enemy.x + enemy.width, enemy.y + enemy.height,
-                enemy.x, enemy.y + enemy.height
-            };
+            GLfloat enemyVertices[16];
+
+            if (enemy.direction == 1) {
+                enemyVertices[0] = enemy.x;
+                enemyVertices[1] = enemy.y;
+                enemyVertices[2] = 0.0f;
+                enemyVertices[3] = 0.0f;
+
+                enemyVertices[4] = enemy.x + enemy.width;
+                enemyVertices[5] = enemy.y;
+                enemyVertices[6] = 1.0f;
+                enemyVertices[7] = 0.0f;
+
+                enemyVertices[8] = enemy.x + enemy.width;
+                enemyVertices[9] = enemy.y + enemy.height;
+                enemyVertices[10] = 1.0f;
+                enemyVertices[11] = 1.0f;
+
+                enemyVertices[12] = enemy.x;
+                enemyVertices[13] = enemy.y + enemy.height;
+                enemyVertices[14] = 0.0f;
+                enemyVertices[15] = 1.0f;
+            }
+            else {
+                enemyVertices[0] = enemy.x;
+                enemyVertices[1] = enemy.y;
+                enemyVertices[2] = 1.0f;
+                enemyVertices[3] = 0.0f;
+
+                enemyVertices[4] = enemy.x + enemy.width;
+                enemyVertices[5] = enemy.y;
+                enemyVertices[6] = 0.0f;
+                enemyVertices[7] = 0.0f;
+
+                enemyVertices[8] = enemy.x + enemy.width;
+                enemyVertices[9] = enemy.y + enemy.height;
+                enemyVertices[10] = 0.0f;
+                enemyVertices[11] = 1.0f;
+
+                enemyVertices[12] = enemy.x;
+                enemyVertices[13] = enemy.y + enemy.height;
+                enemyVertices[14] = 1.0f;
+                enemyVertices[15] = 1.0f;
+            }
 
             // Genera e bind del Vertex Array Object (VAO) per il nemico
             GLuint enemyVao;
@@ -270,18 +507,27 @@ void drawEnemies() {
 
             // Imposta l'attributo di posizione del nemico
             glEnableVertexAttribArray(0);
-            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+
+            // Imposta l'attributo delle coordinate della texture del nemico
+            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+            // Attiva la texture
+            glBindTexture(GL_TEXTURE_2D, EnemyTexture);
 
             // Disegna il nemico
             glDrawArrays(GL_QUADS, 0, 4);
 
             // Pulizia delle risorse
             glDisableVertexAttribArray(0);
+            glDisableVertexAttribArray(1);
             glDeleteBuffers(1, &enemyVbo);
             glDeleteVertexArrays(1, &enemyVao);
         }
     }
 }
+
 
 
 bool isOverlapping(Platform platform1, Platform platform2) {
@@ -328,39 +574,6 @@ void initializePlatforms() {
 }
 
 
-
-void displayPlatforms() {
-    // Collega il VAO per le piattaforme
-    glBindVertexArray(playerVao);
-
-    // Itera sulle piattaforme
-    for (const Platform& platform : platforms) {
-        // Calcola i vertici della piattaforma
-        GLfloat platformVertices[] = {
-            platform.x, platform.y,
-            platform.x + platform.width, platform.y,
-            platform.x + platform.width, platform.y + platform.height,
-            platform.x, platform.y + platform.height
-        };
-
-        // Collega il VBO per i vertici della piattaforma
-        glBindBuffer(GL_ARRAY_BUFFER, playerVbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(platformVertices), platformVertices, GL_STATIC_DRAW);
-
-        // Abilita l'array degli attributi dei vertici
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-        // Disegna la piattaforma
-        glDrawArrays(GL_QUADS, 0, 4);
-    }
-
-    // Scollega il VAO e il VBO
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-
-
 void shootBullet() {
     // Crea un nuovo proiettile
     Bullet newBullet;
@@ -370,7 +583,7 @@ void shootBullet() {
         newBullet.x = PLAYER_POSITION_X + PLAYER_WIDTH * 0.8;
     }
     else newBullet.x = PLAYER_POSITION_X - (PLAYER_WIDTH * (2/3));
-    newBullet.y = PLAYER_POSITION_Y + PLAYER_HEIGHT/2;
+    newBullet.y = PLAYER_POSITION_Y + PLAYER_HEIGHT/3;
     newBullet.speed = 0.02f;
     newBullet.isActive = true;
 
@@ -453,71 +666,6 @@ void updatePlayerInteractions() {
     }
 }
 
-void update(int value) {
-    if (!game_over && !pausa) {
-        // Aggiorna la posizione del giocatore
-            //Spostamento orizzontale
-        ObjectInertiaHandler(PLAYER_POSITION_X, PLAYER_SPEED_X);
-        updatePlayerInteractions();
-
-        //Spostamento verticale e gravità
-        ObjectGravityHandler(PLAYER_POSITION_X, PLAYER_POSITION_Y, PLAYER_SPEED_Y, PLAYER_WIDTH);
-
-        // Aggiorna la posizione del proiettile
-        bulletMovementHandler();
-
-        checkBulletCollision();
-
-        checkPlayerEnemyCollison();
-
-        // Aggiorna la posizione dei nemici
-        moveEnemies();
-
-        //enemiesSpawner();
-    }
-        // Richiede il ridisegno della scena
-        glutPostRedisplay();
-        glutTimerFunc(16, update, 0);
-}
-
-void playerTexture() {
-
-    stbi_set_flip_vertically_on_load(true);
-
-    // Abilita il blending
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    // Carica l'immagine della texture
-    int width, height, nrChannels;
-    unsigned char* data = stbi_load("./Textures/Player.png", &width, &height, &nrChannels, 0);
-
-    // Genera un ID per la texture e la lega
-    glGenTextures(1, &PlayerTexture);
-    glBindTexture(GL_TEXTURE_2D, PlayerTexture);
-
-    // Imposta i parametri di wrapping e filtering della texture
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // Carica i dati dell'immagine nella texture
-    if (data)
-    {
-        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-    stbi_image_free(data);
-
-}
-
-
 void drawPlayer() {
     // Colore del giocatore
     glColor3f(1.0f, 0.0f, 0.0f);
@@ -526,13 +674,51 @@ void drawPlayer() {
     glBindVertexArray(playerVao);
     glBindBuffer(GL_ARRAY_BUFFER, playerVbo);
 
-    GLfloat PLAYER_VERTICES[] = {
-        // Posizioni         // Coordinate della texture
-        PLAYER_POSITION_X, PLAYER_POSITION_Y, 0.0f, 0.0f,
-        PLAYER_POSITION_X + PLAYER_WIDTH, PLAYER_POSITION_Y, 1.0f, 0.0f,
-        PLAYER_POSITION_X + PLAYER_WIDTH, PLAYER_POSITION_Y + PLAYER_HEIGHT, 1.0f, 1.0f,
-        PLAYER_POSITION_X, PLAYER_POSITION_Y + PLAYER_HEIGHT, 0.0f, 1.0f
-    };
+    GLfloat PLAYER_VERTICES[16];
+
+    if (bulletDirection == 1) {
+        PLAYER_VERTICES[0] = PLAYER_POSITION_X;
+        PLAYER_VERTICES[1] = PLAYER_POSITION_Y;
+        PLAYER_VERTICES[2] = 0.0f;
+        PLAYER_VERTICES[3] = 0.0f;
+
+        PLAYER_VERTICES[4] = PLAYER_POSITION_X + PLAYER_WIDTH;
+        PLAYER_VERTICES[5] = PLAYER_POSITION_Y;
+        PLAYER_VERTICES[6] = 1.0f;
+        PLAYER_VERTICES[7] = 0.0f;
+
+        PLAYER_VERTICES[8] = PLAYER_POSITION_X + PLAYER_WIDTH;
+        PLAYER_VERTICES[9] = PLAYER_POSITION_Y + PLAYER_HEIGHT;
+        PLAYER_VERTICES[10] = 1.0f;
+        PLAYER_VERTICES[11] = 1.0f;
+
+        PLAYER_VERTICES[12] = PLAYER_POSITION_X;
+        PLAYER_VERTICES[13] = PLAYER_POSITION_Y + PLAYER_HEIGHT;
+        PLAYER_VERTICES[14] = 0.0f;
+        PLAYER_VERTICES[15] = 1.0f;
+    }
+    else {
+        PLAYER_VERTICES[0] = PLAYER_POSITION_X;
+        PLAYER_VERTICES[1] = PLAYER_POSITION_Y;
+        PLAYER_VERTICES[2] = 1.0f;
+        PLAYER_VERTICES[3] = 0.0f;
+
+        PLAYER_VERTICES[4] = PLAYER_POSITION_X + PLAYER_WIDTH;
+        PLAYER_VERTICES[5] = PLAYER_POSITION_Y;
+        PLAYER_VERTICES[6] = 0.0f;
+        PLAYER_VERTICES[7] = 0.0f;
+
+        PLAYER_VERTICES[8] = PLAYER_POSITION_X + PLAYER_WIDTH;
+        PLAYER_VERTICES[9] = PLAYER_POSITION_Y + PLAYER_HEIGHT;
+        PLAYER_VERTICES[10] = 0.0f;
+        PLAYER_VERTICES[11] = 1.0f;
+
+        PLAYER_VERTICES[12] = PLAYER_POSITION_X;
+        PLAYER_VERTICES[13] = PLAYER_POSITION_Y + PLAYER_HEIGHT;
+        PLAYER_VERTICES[14] = 1.0f;
+        PLAYER_VERTICES[15] = 1.0f;
+    }
+
 
     // Genera e bind del Vertex Array Object (VAO) per il giocatore
     GLuint playerVao;
@@ -572,15 +758,15 @@ void drawBullets() {
     // Colore del proiettile
     glColor3f(0.0f, 0.0f, 1.0f);
 
-
     for (const auto& bullet : bullets) {
         if (bullet.isActive) {
             // Calcola i vertici del proiettile
             GLfloat bulletVertices[] = {
-                bullet.x, bullet.y,
-                bullet.x + bullet.width, bullet.y,
-                bullet.x + bullet.width, bullet.y + bullet.height,
-                bullet.x, bullet.y + bullet.height
+                // Posizioni         // Coordinate della texture
+                bullet.x, bullet.y, 0.0f, 0.0f,
+                bullet.x + bullet.width, bullet.y, 1.0f, 0.0f,
+                bullet.x + bullet.width, bullet.y + bullet.height, 1.0f, 1.0f,
+                bullet.x, bullet.y + bullet.height, 0.0f, 1.0f
             };
 
             // Genera e bind del Vertex Array Object (VAO) per il proiettile
@@ -596,13 +782,21 @@ void drawBullets() {
 
             // Imposta l'attributo di posizione del proiettile
             glEnableVertexAttribArray(0);
-            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+
+            // Imposta l'attributo delle coordinate della texture del proiettile
+            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+            // Attiva la texture
+            glBindTexture(GL_TEXTURE_2D, BulletTexture);
 
             // Disegna il proiettile
             glDrawArrays(GL_QUADS, 0, 4);
 
             // Pulizia delle risorse
             glDisableVertexAttribArray(0);
+            glDisableVertexAttribArray(1);
             glDeleteBuffers(1, &bulletVbo);
             glDeleteVertexArrays(1, &bulletVao);
         }
@@ -610,23 +804,23 @@ void drawBullets() {
 }
 
 
-
 void drawPlatforms() {
     // Colore delle piattaforme
     glColor3f(1.0f, 1.0f, 0.0f);
+
     for (const Platform& platform : platforms) {
         GLfloat platformVertices[] = {
-            platform.x, platform.y,
-            platform.x + platform.width, platform.y,
-            platform.x + platform.width, platform.y + platform.height,
-            platform.x, platform.y + platform.height
+            // Posizioni         // Coordinate della texture
+            platform.x, platform.y, 0.0f, 0.0f,
+            platform.x + platform.width, platform.y, 1.0f, 0.0f,
+            platform.x + platform.width, platform.y + platform.height, 1.0f, 1.0f,
+            platform.x, platform.y + platform.height, 0.0f, 1.0f
         };
 
         glBindBuffer(GL_ARRAY_BUFFER, platformVbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(platformVertices), platformVertices, GL_STATIC_DRAW);
 
         glDrawArrays(GL_QUADS, 0, 4);
-
 
         // Genera e bind del Vertex Array Object (VAO) per la piattaforma
         GLuint platformVao;
@@ -641,17 +835,69 @@ void drawPlatforms() {
 
         // Imposta l'attributo di posizione della piattaforma
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+
+        // Imposta l'attributo delle coordinate della texture della piattaforma
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+        // Attiva la texture
+        glBindTexture(GL_TEXTURE_2D, PlatformTexture);
 
         // Disegna la piattaforma
         glDrawArrays(GL_QUADS, 0, 4);
 
         // Pulizia delle risorse
         glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
         glDeleteBuffers(1, &platformVbo);
         glDeleteVertexArrays(1, &platformVao);
     }
 }
+
+void drawBackground() {
+    // Calcola i vertici del rettangolo di sfondo
+    GLfloat backgroundVertices[] = {
+        // Posizioni         // Coordinate della texture
+        -1.0f, -1.0f, 0.0f, 0.0f,
+         1.0f, -1.0f, 1.0f, 0.0f,
+         1.0f,  1.0f, 1.0f, 1.0f,
+        -1.0f,  1.0f, 0.0f, 1.0f
+    };
+
+    // Genera e bind del Vertex Array Object (VAO) per lo sfondo
+    GLuint backgroundVao;
+    glGenVertexArrays(1, &backgroundVao);
+    glBindVertexArray(backgroundVao);
+
+    // Genera e bind del Vertex Buffer Object (VBO) per i vertici dello sfondo
+    GLuint backgroundVbo;
+    glGenBuffers(1, &backgroundVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, backgroundVbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(backgroundVertices), backgroundVertices, GL_STATIC_DRAW);
+
+    // Imposta l'attributo di posizione dello sfondo
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+
+    // Imposta l'attributo delle coordinate della texture dello sfondo
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+    // Attiva la texture
+    glBindTexture(GL_TEXTURE_2D, BackgroundTexture);
+
+    // Disegna lo sfondo
+    glDrawArrays(GL_QUADS, 0, 4);
+
+    // Pulizia delle risorse
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+    glDeleteBuffers(1, &backgroundVbo);
+    glDeleteVertexArrays(1, &backgroundVao);
+}
+
+
 
 void MostraPunteggio(int x, int y, float r, float g, float b, void* font, int punteggio){
     char buffer[20];
@@ -690,23 +936,66 @@ void Pausa() {
 }
 
 
+void update(int value) {
+    if (!game_over && !pausa) {
+        // Aggiorna la posizione del giocatore
+            //Spostamento orizzontale
+        ObjectInertiaHandler(PLAYER_POSITION_X, PLAYER_SPEED_X);
+        updatePlayerInteractions();
+
+        //Spostamento verticale e gravità
+        ObjectGravityHandler(PLAYER_POSITION_X, PLAYER_POSITION_Y, PLAYER_SPEED_Y, PLAYER_WIDTH);
+
+        // Aggiorna la posizione del proiettile
+        bulletMovementHandler();
+
+        checkBulletCollision();
+
+        checkPlayerEnemyCollison();
+
+        // Aggiorna la posizione dei nemici
+        moveEnemies();
+
+        enemiesSpawner();
+    }
+    // Richiede il ridisegno della scena
+    glutPostRedisplay();
+    glutTimerFunc(16, update, 0);
+}
 
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
 
-    // Itera sulle piattaforme e disegna ciascuna di esse
-    drawPlatforms();
+    if (showHitBox) {
+        // Itera sulle piattaforme e disegna ciascuna di esse
+        drawPlatforms();
 
-    glUseProgram(programId);
-    drawPlayer();
-    glUseProgram(0);
+        drawPlayer();
+
+        // Disegna i proiettili sparati dal giocatore
+        drawBullets();
+
+        drawEnemies();
+    }
+    else {
+        glUseProgram(programId);
+
+        drawBackground();
+
+        // Itera sulle piattaforme e disegna ciascuna di esse
+        drawPlatforms();
+
+        drawPlayer();
+
+        // Disegna i proiettili sparati dal giocatore
+        drawBullets();
+
+        drawEnemies();
+        glUseProgram(0);
+    }
 
 
-    // Disegna i proiettili sparati dal giocatore
-    drawBullets();
-
-    drawEnemies();
 
     MostraPunteggio(10, 700, 1, 1, 1, GLUT_BITMAP_9_BY_15, punteggio);
 
@@ -718,9 +1007,6 @@ void display() {
         Pausa();
     }
 
-
-
-    
     glutSwapBuffers();
 }
 
@@ -751,6 +1037,15 @@ void keyboard(unsigned char key, int x, int y) {
         }
         else if (pausa) {
             pausa = false;
+        }
+        break;
+    case 'h':
+    case 'H':
+        if (!showHitBox) {
+            showHitBox = true;
+        }
+        else if (showHitBox) {
+            showHitBox = false;
         }
         break;
     }
@@ -791,7 +1086,7 @@ int main(int argc, char** argv) {
     glewInit();
     initializePlatforms();
 
-    playerTexture();
+    texturesLoader();
 
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
