@@ -15,10 +15,7 @@
 static unsigned int programId;
 
 #define SPACE_BAR 32
-
-bool pausa = true;
-
-bool showHitBox = false;
+#define ENTER '\r'
 
 float PLAYER_SPEED_X = 0;
 
@@ -38,6 +35,9 @@ float deltaTime;
 
 int punteggio = 0;
 bool game_over = false;
+bool startGame = false;
+bool pausa = false;
+bool showHitBox = false;
 
 
 float PLAYER_POSITION_X = 0.0f;
@@ -373,7 +373,7 @@ void ObjectRightMover(float& objectX, float& objectY, float& object_speedX, floa
     }
 }
 
-int randomSign(){
+int randomSign() {
     int randomNumber = rand();
     if (randomNumber % 2 == 0)
         return 1;
@@ -388,7 +388,7 @@ void createEnemies() {
     Enemy enemy;
     enemy.x = randomSign();// Posizione X del nemico
     enemy.y = -0.9f;// Posizione Y del nemico
-    enemy.width = PLAYER_WIDTH/2;// Larghezza del nemico
+    enemy.width = PLAYER_WIDTH / 2;// Larghezza del nemico
     enemy.height = PLAYER_HEIGHT;// Altezza del nemico
     enemy.acceleration = PLAYER_ACCELERATION / 3;
     enemy.speedX = 0.005f;
@@ -418,7 +418,7 @@ void enemiesSpawner() {
 void moveEnemies() {
     for (Enemy& enemy : enemies) {
         if (enemy.alive) {
- 
+
             if (PLAYER_POSITION_X > enemy.x) {
                 ObjectRightMover(enemy.x, enemy.y, enemy.speedX, enemy.acceleration);
                 enemy.direction = 1;
@@ -582,8 +582,8 @@ void shootBullet() {
     if (bulletDirection == 1) {
         newBullet.x = PLAYER_POSITION_X + PLAYER_WIDTH * 0.8;
     }
-    else newBullet.x = PLAYER_POSITION_X - (PLAYER_WIDTH * (2/3));
-    newBullet.y = PLAYER_POSITION_Y + PLAYER_HEIGHT/3;
+    else newBullet.x = PLAYER_POSITION_X - (PLAYER_WIDTH * (2 / 3));
+    newBullet.y = PLAYER_POSITION_Y + PLAYER_HEIGHT / 3;
     newBullet.speed = 0.02f;
     newBullet.isActive = true;
 
@@ -602,10 +602,12 @@ void bulletMovementHandler() {
             bulletIt->x += (bulletIt->speed * bulletIt->direction); // Muovi il proiettile in base alla direzione dello sparo
             if (bulletIt->x > 1.0f || bulletIt->x < -1.0f) {
                 bulletIt = bullets.erase(bulletIt); // Rimuovi il proiettile dagli array
-            } else {
+            }
+            else {
                 ++bulletIt;
             }
-        } else {
+        }
+        else {
             ++bulletIt;
         }
     }
@@ -899,7 +901,7 @@ void drawBackground() {
 
 
 
-void MostraPunteggio(int x, int y, float r, float g, float b, void* font, int punteggio){
+void MostraPunteggio(int x, int y, float r, float g, float b, void* font, int punteggio) {
     char buffer[20];
     sprintf_s(buffer, "Punteggio: %d", punteggio);
     glColor3f(r, g, b);
@@ -911,7 +913,7 @@ void MostraPunteggio(int x, int y, float r, float g, float b, void* font, int pu
     }
 }
 
-void GameOver() {
+void printGameOver() {
     char buffer[10];
     sprintf_s(buffer, "Game Over");
     glColor3f(1, 0, 0);
@@ -922,12 +924,35 @@ void GameOver() {
         glutBitmapCharacter(GLUT_BITMAP_9_BY_15, buffer[i]);
     }
 }
+void printRetry() {
+    char buffer[100];
+    sprintf_s(buffer, "Premere R per riprovare");
+    glColor3f(0, 1, 0);
+    glWindowPos2f(570, 330);
+    int len, i;
+    len = (int)strlen(buffer);
+    for (i = 0; i < len; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_9_BY_15, buffer[i]);
+    }
+}
 
-void Pausa() {
+void printPausa() {
     char buffer[10];
     sprintf_s(buffer, "PAUSA");
     glColor3f(1, 1, 1);
-    glWindowPos2f(640, 360);
+    glWindowPos2f(640, 340);
+    int len, i;
+    len = (int)strlen(buffer);
+    for (i = 0; i < len; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_9_BY_15, buffer[i]);
+    }
+}
+
+void printStartGame() {
+    char buffer[100];
+    sprintf_s(buffer, "Premi invio per cominciare");
+    glColor3f(1, 1, 1);
+    glWindowPos2f(560, 340);
     int len, i;
     len = (int)strlen(buffer);
     for (i = 0; i < len; i++) {
@@ -937,7 +962,7 @@ void Pausa() {
 
 
 void update(int value) {
-    if (!game_over && !pausa) {
+    if (!game_over && !pausa && startGame) {
         // Aggiorna la posizione del giocatore
             //Spostamento orizzontale
         ObjectInertiaHandler(PLAYER_POSITION_X, PLAYER_SPEED_X);
@@ -995,21 +1020,36 @@ void display() {
         glUseProgram(0);
     }
 
-
-
     MostraPunteggio(10, 700, 1, 1, 1, GLUT_BITMAP_9_BY_15, punteggio);
 
     if (game_over) {
-        GameOver();
+        printGameOver();
+        printRetry();
     }
 
     if (pausa && !game_over) {
-        Pausa();
+        printPausa();
+    }
+
+    if (!startGame) {
+        printStartGame();
     }
 
     glutSwapBuffers();
 }
 
+void resetGame() {
+    PLAYER_SPEED_X = 0;
+    PLAYER_SPEED_Y = 0;
+    PLAYER_POSITION_X = 0.0f;
+    PLAYER_POSITION_Y = -0.9f;
+    enemies.clear();
+    bullets.clear();
+    platforms.clear();
+    initializePlatforms();
+    punteggio = 0;
+    game_over = false;
+}
 
 void keyboard(unsigned char key, int x, int y) {
     switch (key) {
@@ -1047,6 +1087,12 @@ void keyboard(unsigned char key, int x, int y) {
         else if (showHitBox) {
             showHitBox = false;
         }
+        break;
+    case 'r':
+    case 'R':
+        resetGame();
+    case ENTER:
+        startGame = true;
         break;
     }
 }
