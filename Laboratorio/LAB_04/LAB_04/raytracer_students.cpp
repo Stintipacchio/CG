@@ -10,176 +10,164 @@
 
 // casts a single ray through the scene geometry and finds the closest hit
 bool
-RayTracer::CastRay (Ray & ray, Hit & h, bool use_sphere_patches) const
+RayTracer::CastRay(Ray& ray, Hit& h, bool use_sphere_patches) const
 {
-  bool answer = false;
-  Hit nearest;
-  nearest = Hit();
+	bool answer = false;
+	Hit nearest;
+	nearest = Hit();
 
-  // intersect each of the quads
-  for (int i = 0; i < mesh->numQuadFaces (); i++)
-  {
-	Face *f = mesh->getFace (i);
-	if (f->intersect (ray, h, args->intersect_backfacing))
+	// intersect each of the quads
+	for (int i = 0; i < mesh->numQuadFaces(); i++)
 	{
-		if( h.getT() < nearest.getT() )
+		Face* f = mesh->getFace(i);
+		if (f->intersect(ray, h, args->intersect_backfacing))
 		{
-			answer = true;
-			nearest = h;
+			if (h.getT() < nearest.getT())
+			{
+				answer = true;
+				nearest = h;
+			}
 		}
 	}
-  }
 
-  // intersect each of the spheres (either the patches, or the original spheres)
-  if (use_sphere_patches)
-  {
-	for (int i = mesh->numQuadFaces (); i < mesh->numFaces (); i++)
+	// intersect each of the spheres (either the patches, or the original spheres)
+	if (use_sphere_patches)
 	{
-	  Face *f = mesh->getFace (i);
-	  if (f->intersect (ray, h, args->intersect_backfacing))
-	  {
-		if( h.getT() < nearest.getT() )
+		for (int i = mesh->numQuadFaces(); i < mesh->numFaces(); i++)
 		{
-			answer = true;
-			nearest = h;
+			Face* f = mesh->getFace(i);
+			if (f->intersect(ray, h, args->intersect_backfacing))
+			{
+				if (h.getT() < nearest.getT())
+				{
+					answer = true;
+					nearest = h;
+				}
+			}
 		}
-	  }
 	}
-  }
-  else
-  {
-	const vector < Sphere * >&spheres = mesh->getSpheres ();
-	for (unsigned int i = 0; i < spheres.size (); i++)
+	else
 	{
-	  if (spheres[i]->intersect (ray, h))
-	  {
-		if( h.getT() < nearest.getT() )
+		const vector < Sphere* >& spheres = mesh->getSpheres();
+		for (unsigned int i = 0; i < spheres.size(); i++)
 		{
-			answer = true;
-			nearest = h;
+			if (spheres[i]->intersect(ray, h))
+			{
+				if (h.getT() < nearest.getT())
+				{
+					answer = true;
+					nearest = h;
+				}
+			}
 		}
-	  }
 	}
-  }
 
-  h = nearest;
-  return answer;
+	h = nearest;
+	return answer;
 }
 
 Vec3f
-RayTracer::TraceRay (Ray & ray, Hit & hit, int bounce_count) const
+RayTracer::TraceRay(Ray& ray, Hit& hit, int bounce_count) const
 {
 
-  hit = Hit ();
-  bool intersect = CastRay (ray, hit, false);
+	hit = Hit();
+	bool intersect = CastRay(ray, hit, false);
 
-  if( bounce_count == args->num_bounces )
-  	RayTree::SetMainSegment (ray, 0, hit.getT () );
-  else
-	RayTree::AddReflectedSegment(ray, 0, hit.getT() );
+	if (bounce_count == args->num_bounces)
+		RayTree::SetMainSegment(ray, 0, hit.getT());
+	else
+		RayTree::AddReflectedSegment(ray, 0, hit.getT());
 
-  Vec3f answer = args->background_color;
+	Vec3f answer = args->background_color;
 
-  Material *m = hit.getMaterial ();
-  if (intersect == true)
-  {
-	assert (m != NULL);
-	Vec3f normal = hit.getNormal ();
-	Vec3f point = ray.pointAtParameter (hit.getT ());
-
-	// ----------------------------------------------
-	// ambient light
-	answer = args->ambient_light * m->getDiffuseColor ();
-
-	// ----------------------------------------------
-	// if the surface is shiny...
-	Vec3f reflectiveColor = m->getReflectiveColor ();
-
-	// ==========================================
-	// ASSIGNMENT:  ADD REFLECTIVE LOGIC
-	// ==========================================
-	
-	// se (il punto sulla superficie e' riflettente & bounce_count>0)
-    
-	//     calcolare ReflectionRay  R=2<n,l>n -l
-
-    //	   invocare TraceRay(ReflectionRay, hit,bounce_count-1)
-	
-	//     aggiungere ad answer il contributo riflesso
-	
-	// ----------------------------------------------
-	if (reflectiveColor.Length() != 0 && bounce_count > 0) {
-		Vec3f VRay = ray.getDirection();
-		Vec3f reflectiomRay = VRay - (2 * VRay.Dot3(normal) * normal);
-		reflectiomRay.Normalize();
-		Ray* new_ray = new Ray(point, reflectiomRay);
-
-		answer += TraceRay(*new_ray, hit, bounce_count - 1) * reflectiveColor;
-	}
-
-	// add each light
-	Hit* new_hit;
-	bool colpito;
-	Ray* n_ray;
-	Vec3f n_point, dista, pointOnlight, dirToLight;
-
-
-	int num_lights = mesh->getLights ().size ();
-	for (int i = 0; i < num_lights; i++)
+	Material* m = hit.getMaterial();
+	if (intersect == true)
 	{
-	  // ==========================================
-	  // ASSIGNMENT:  ADD SHADOW LOGIC
-	  // ==========================================
-	  Face *f = mesh->getLights ()[i];
-	  Vec3f pointOnLight = f->computeCentroid ();
-	  Vec3f dirToLight = pointOnLight - point;
-	  dirToLight.Normalize ();
+		assert(m != NULL);
+		Vec3f normal = hit.getNormal();
+		Vec3f point = ray.pointAtParameter(hit.getT());
 
-	  //SOFT SHADOWS
-	  extern bool softShadow;
+		// ----------------------------------------------
+		// ambient light
+		answer = args->ambient_light * m->getDiffuseColor();
 
-	  //SOFT SHADOWS
-	  if (args->softShadow) {
-		  int hMAX = 600;
-		  for (int h = 0; h < hMAX; h++) {
-			  new_hit = new Hit();
-			  pointOnLight = f->RandomPoint();            //scelta casuale di un punto nell'area della luce
-			  dirToLight = pointOnLight - point;
-			  dirToLight.Normalize();
-			  n_ray = new Ray(point, dirToLight);
-		  }
-	  }
+		// ----------------------------------------------
+		// if the surface is shiny...
+		Vec3f reflectiveColor = m->getReflectiveColor();
 
+		// ==========================================
+		// ASSIGNMENT:  ADD REFLECTIVE LOGIC
+		// ==========================================
 
+		// se (il punto sulla superficie e' riflettente & bounce_count>0)
+		if (reflectiveColor.Length() != 0 && bounce_count > 0) {
+			Vec3f VRay = ray.getDirection();
+			Vec3f reflectionRay = VRay - (2 * VRay.Dot3(normal) * normal);
+			reflectionRay.Normalize();
+			Ray* new_ray = new Ray(point, reflectionRay);
 
-	  // creare shadow ray verso il punto luce
+			answer += TraceRay(*new_ray, hit, bounce_count - 1) * reflectiveColor;
+		}
 
-	// controllare il primo oggetto colpito da tale raggio
+		// ----------------------------------------------
 
-	// se e' la sorgente luminosa i-esima allora
-	//	calcolare e aggiungere ad answer il contributo luminoso
-	// altrimenti
-	//    la luce i non contribuisce alla luminosita' di point.
+		Hit* new_hit;
+		bool colpito;
+		Ray* n_ray;
+		Vec3f n_point, dista, pointOnLight, dirToLight;
 
-	  n_ray = new Ray(point, dirToLight);
-	  new_hit = new Hit();
-	  colpito = CastRay(*n_ray, *new_hit, false);
+		// add each light
+		int num_lights = mesh->getLights().size();
+		for (int i = 0; i < num_lights; i++)
+		{
+			// ==========================================
+			// ASSIGNMENT:  ADD SHADOW LOGIC
+			// ==========================================
+			Face* f = mesh->getLights()[i];
+			Vec3f pointOnLight = f->computeCentroid();
+			Vec3f dirToLight = pointOnLight - point;
+			dirToLight.Normalize();
+			extern bool softShadow;
 
-	  if (colpito) {
-		  n_point = n_ray->pointAtParameter(new_hit->getT());
-		  //calcola il vettore distanza  fra il punto colpito dal raggio e il punto sulla luce
-		  dista.Sub(dista, n_point, pointOnLight);
+			//SOFT SHADOWS
+			if (args->softShadow) {
+				int hMAX = 600;
+				for (int h = 0; h < hMAX; h++) {
+					new_hit = new Hit();
+					pointOnLight = f->RandomPoint();			//scelta casuale di un punto nell'area della luce
+					dirToLight = pointOnLight - point;
+					dirToLight.Normalize();
+					n_ray = new Ray(point, dirToLight);
+				}
+			}
 
-		  if (dista.Length() < 0.01) {
-			  if(normal.Dot3(dirToLight) > 0){
-				  Vec3f lightColor = 0.2 * f->getMaterial()->getEmittedColor() * f->getArea();
-				  answer += m->Shade(ray, hit, dirToLight, lightColor, args);
-			  }
-		  }
-	  }
+			// creare shadow ray verso il punto luce
+			n_ray = new Ray(point, dirToLight);
+			new_hit = new Hit();
+			colpito = CastRay(*n_ray, *new_hit, false);
+
+			// controllare il primo oggetto colpito da tale raggio
+			if (colpito) {
+				n_point = n_ray->pointAtParameter(new_hit->getT());
+				dista.Sub(dista, n_point, pointOnLight);
+
+				if (dista.Length() < 0.01) {
+					// se e' la sorgente luminosa i-esima allora
+					//	calcolare e aggiungere ad answer il contributo luminoso
+					// altrimenti
+					//    la luce i non contribuisce alla luminosita' di point.
+					if (normal.Dot3(dirToLight) > 0) {
+						if (normal.Dot3(dirToLight) > 0) {
+							Vec3f lightColor = 0.2 * f->getMaterial()->getEmittedColor() * f->getArea();
+							answer += m->Shade(ray, hit, dirToLight, lightColor, args);
+						}
+					}
+				}
+			}
+
+		}
+
 	}
-    
-  }
 
-  return answer;
+	return answer;
 }
