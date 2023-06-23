@@ -905,7 +905,7 @@ void drawBackground() {
 
 
 
-void MostraPunteggio(int x, int y, float r, float g, float b, void* font, int punteggio) {
+void printPunteggio(int x, int y, float r, float g, float b, void* font, int punteggio) {
     char buffer[20];
     sprintf_s(buffer, "Punteggio: %d", punteggio);
     glColor3f(r, g, b);
@@ -1025,7 +1025,7 @@ void display() {
         glUseProgram(0);
     }
 
-    MostraPunteggio(10, 700, 1, 1, 1, GLUT_BITMAP_9_BY_15, punteggio);
+    printPunteggio(10, 700, 1, 1, 1, GLUT_BITMAP_9_BY_15, punteggio);
 
     if (game_over) {
         printGameOver();
