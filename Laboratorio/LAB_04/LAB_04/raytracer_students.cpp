@@ -134,6 +134,24 @@ RayTracer::TraceRay (Ray & ray, Hit & hit, int bounce_count) const
 	  Vec3f pointOnLight = f->computeCentroid ();
 	  Vec3f dirToLight = pointOnLight - point;
 	  dirToLight.Normalize ();
+
+	  //SOFT SHADOWS
+	  extern bool softShadow;
+
+	  //SOFT SHADOWS
+	  if (args->softShadow) {
+		  int hMAX = 600;
+		  for (int h = 0; h < hMAX; h++) {
+			  new_hit = new Hit();
+			  pointOnLight = f->RandomPoint();            //scelta casuale di un punto nell'area della luce
+			  dirToLight = pointOnLight - point;
+			  dirToLight.Normalize();
+			  n_ray = new Ray(point, dirToLight);
+		  }
+	  }
+
+
+
 	  // creare shadow ray verso il punto luce
 
 	// controllare il primo oggetto colpito da tale raggio
