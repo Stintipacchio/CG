@@ -398,7 +398,7 @@ void createEnemies() {
 }
 
 void increasedSpawnrate() {
-    enemySpawnTime *= 0.98f; // Riduci il tempo per creare un nuovo nemico del 10%
+    enemySpawnTime *= 0.96f; // Riduci il tempo per creare un nuovo nemico del 4%
 }
 
 void enemiesSpawner() {
@@ -416,8 +416,12 @@ void enemiesSpawner() {
 
 
 void moveEnemies() {
+    srand(time(NULL));
+    int randomJump;
     for (Enemy& enemy : enemies) {
         if (enemy.alive) {
+
+            randomJump = std::rand() % 10 + 1;
 
             if (PLAYER_POSITION_X > enemy.x) {
                 ObjectRightMover(enemy.x, enemy.y, enemy.speedX, enemy.acceleration);
@@ -427,7 +431,7 @@ void moveEnemies() {
                 ObjectLeftMover(enemy.x, enemy.y, enemy.speedX, enemy.acceleration);
                 enemy.direction = -1;
             }
-            if (PLAYER_POSITION_Y > enemy.y) {
+            if (PLAYER_POSITION_Y > enemy.y || (randomJump == 1)) {
                 jump(enemy.speedY, enemy.jumpForce);
             }
             // Aggiorna la posizione dei nemici in base alla logica di movimento
@@ -924,6 +928,7 @@ void printGameOver() {
         glutBitmapCharacter(GLUT_BITMAP_9_BY_15, buffer[i]);
     }
 }
+
 void printRetry() {
     char buffer[100];
     sprintf_s(buffer, "Premere R per riprovare");
@@ -1048,6 +1053,7 @@ void resetGame() {
     platforms.clear();
     initializePlatforms();
     punteggio = 0;
+    enemySpawnTime = 5.0f;
     game_over = false;
 }
 
