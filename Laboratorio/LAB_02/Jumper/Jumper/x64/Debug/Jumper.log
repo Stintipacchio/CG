@@ -5,6 +5,6 @@ C:\Users\stint\Desktop\CG\Laboratorio\LAB_02\Jumper\Jumper\Jumper.cpp(395,46): w
 C:\Users\stint\Desktop\CG\Laboratorio\LAB_02\Jumper\Jumper\Jumper.cpp(419,15): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
 C:\Users\stint\Desktop\CG\Laboratorio\LAB_02\Jumper\Jumper\Jumper.cpp(549,15): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
 C:\Users\stint\Desktop\CG\Laboratorio\LAB_02\Jumper\Jumper\Jumper.cpp(587,41): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\stint\Desktop\CG\Laboratorio\LAB_02\Jumper\Jumper\Jumper.cpp(911,22): warning C4244: 'argument': conversion from 'int' to 'GLfloat', possible loss of data
-C:\Users\stint\Desktop\CG\Laboratorio\LAB_02\Jumper\Jumper\Jumper.cpp(911,19): warning C4244: 'argument': conversion from 'int' to 'GLfloat', possible loss of data
+C:\Users\stint\Desktop\CG\Laboratorio\LAB_02\Jumper\Jumper\Jumper.cpp(912,22): warning C4244: 'argument': conversion from 'int' to 'GLfloat', possible loss of data
+C:\Users\stint\Desktop\CG\Laboratorio\LAB_02\Jumper\Jumper\Jumper.cpp(912,19): warning C4244: 'argument': conversion from 'int' to 'GLfloat', possible loss of data
   Jumper.vcxproj -> C:\Users\stint\Desktop\CG\Laboratorio\LAB_02\Jumper\x64\Debug\Jumper.exe
