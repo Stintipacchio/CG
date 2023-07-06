@@ -1,8 +1,0 @@
-﻿  raytracer_students.cpp
-C:\Users\stint\Desktop\CG\Laboratorio\LAB_04\LAB_04\mesh.h(37,1): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\stint\Desktop\CG\Laboratorio\LAB_04\LAB_04\mesh.h(71,1): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\stint\Desktop\CG\Laboratorio\LAB_04\LAB_04\mesh.h(91,1): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\stint\Desktop\CG\Laboratorio\LAB_04\LAB_04\raytracer_students.cpp(120,44): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\stint\Desktop\CG\Laboratorio\LAB_04\LAB_04\raytracer_students.cpp(161,69): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\stint\Desktop\CG\Laboratorio\LAB_04\LAB_04\face.h(52): warning C4715: 'Face::operator[]': not all control paths return a value
-  LAB_04.vcxproj -> C:\Users\stint\Desktop\CG\Laboratorio\LAB_04\x64\Debug\LAB_04.exe
